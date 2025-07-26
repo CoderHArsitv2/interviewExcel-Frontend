@@ -64,7 +64,7 @@ async function request<T>(
 
 // UNAUTHENTICATED
 export const get = <T>(url: string) => request<T>("GET", url);
-export const post = <T>(url: string, body: any) =>
+export const post = <T>(url: string, body: any ) =>
   request<T>("POST", url, body);
 
 // AUTHENTICATED

@@ -30,7 +30,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider = ({
+  children,
+  userRole,
+}: {
+  children: React.ReactNode;
+  userRole: "student" | "expert";
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [refreshTimer, setRefreshTimer] = useState<NodeJS.Timeout | null>(null);
 
@@ -70,11 +76,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshSession = async () => {
     try {
-      const res: RefreshSessionResponse = await get("/auth/refresh-session");
+      const res: RefreshSessionResponse = await get(
+        `/${userRole}/auth/refresh-session`
+      );
       const newToken = res.access_token;
 
       setToken(newToken);
       setupAutoRefresh(newToken);
+      fetchUserFromToken(newToken);
     } catch (err) {
       console.error("Session refresh failed:", err);
       logout();

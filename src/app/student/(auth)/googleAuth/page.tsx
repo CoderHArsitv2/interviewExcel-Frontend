@@ -23,10 +23,11 @@ export default function GoogleSigninPage() {
         // decode Google JWT if needed
         const googleUser: GoogleJWT = jwtDecode(response.credential);
 
+        console.log("response credential", response.credential);
         // send to your backend for auth
-        const res: any = await post("/student/auth/google-login", {
+        const res: any = await post("/auth/google/login", {
           token: response.credential,
-          user: "student",
+          role: "student",
         });
 
         setToken(res.access_token);

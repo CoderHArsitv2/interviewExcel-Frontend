@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { authenticatedGet, authenticatedPost, get, post } from "./api"; // <--- reusing
 import { RefreshSessionResponse } from "./type";
+import { useRouter } from "next/navigation";
 
 export const setToken = (token: string) => {
   localStorage.setItem("access_token", token);
@@ -39,12 +40,13 @@ export const AuthProvider = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [refreshTimer, setRefreshTimer] = useState<NodeJS.Timeout | null>(null);
-
+  const router = useRouter();
   const isAuthenticated = !!user;
 
   useEffect(() => {
     const token = getToken();
     if (token) {
+      console.log("Found token, fetching user...",token);
       fetchUserFromToken(token);
     }
   }, []);
@@ -52,6 +54,7 @@ export const AuthProvider = ({
   const logout = () => {
     removeToken();
     setUser(null);
+    router.push(`/${userRole}/Signin`);
     if (refreshTimer) clearTimeout(refreshTimer);
   };
 

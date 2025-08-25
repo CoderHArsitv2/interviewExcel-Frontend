@@ -52,6 +52,9 @@ async function request<T>(
       case 500:
         errorMessage = "Internal Server Error";
         break;
+      case 409:
+        errorMessage = errorPayload.error || "User already exists";
+        break;
       default:
         errorMessage = errorPayload.error || `Unexpected Error (${res.status})`;
     }

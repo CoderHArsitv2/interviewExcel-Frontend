@@ -49,7 +49,7 @@ export default function RegisterForm(props: RegisterFormProps) {
         role: "student",
       });
       localStorage.setItem("access_token", res.access_token);
-      router.push("/student/dashboard");
+      router.push("/student/Profile");
     } catch (err: any) {
       console.error(err);
       toast.error("Google sign-in failed");

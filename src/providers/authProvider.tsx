@@ -1,3 +1,4 @@
+"use client"
 import { createContext, useContext, useEffect, useState } from "react";
 import { authenticatedGet, authenticatedPost, get, post } from "./api"; // <--- reusing
 import { RefreshSessionResponse } from "./type";
@@ -45,16 +46,18 @@ export const AuthProvider = ({
 
   useEffect(() => {
     const token = getToken();
+    console.log("token", token);  
     if (token) {
-      console.log("Found token, fetching user...",token);
       fetchUserFromToken(token);
+    }else{
+      router.push(`/${userRole}/Auth`);
     }
   }, []);
 
   const logout = () => {
     removeToken();
     setUser(null);
-    router.push(`/${userRole}/Signin`);
+    router.push(`/${userRole}/Auth`);
     if (refreshTimer) clearTimeout(refreshTimer);
   };
 
@@ -63,7 +66,7 @@ export const AuthProvider = ({
       const payload = JSON.parse(atob(token.split(".")[1]));
       const exp = payload.exp;
       const now = Math.floor(Date.now() / 1000);
-      const timeUntilRefresh = (exp - now - 60) * 1000;
+      const timeUntilRefresh = (exp - now - 10) * 1;
 
       if (refreshTimer) clearTimeout(refreshTimer);
 
@@ -79,8 +82,8 @@ export const AuthProvider = ({
 
   const refreshSession = async () => {
     try {
-      const res: RefreshSessionResponse = await get(
-        `/${userRole}/auth/refresh-session`
+      const res: RefreshSessionResponse = await authenticatedGet(
+        `/auth/refresh`
       );
       const newToken = res.access_token;
 
@@ -95,7 +98,7 @@ export const AuthProvider = ({
 
   const fetchUserFromToken = async (token: string) => {
     try {
-      const data: any = await authenticatedPost("/api/me", token);
+      const data: any = await authenticatedPost("/auth/user", token);
       setUser(data.user);
       setupAutoRefresh(token);
     } catch (err) {

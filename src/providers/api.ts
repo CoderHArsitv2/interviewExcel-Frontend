@@ -21,6 +21,7 @@ async function request<T>(
   const res = await fetch(`${BASE_URL}${url}`, {
     method,
     headers,
+    credentials: requireAuth ? "include" : "same-origin",
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
 

@@ -1,5 +1,3 @@
-"use client";
-
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider } from "@/providers/authProvider";
 

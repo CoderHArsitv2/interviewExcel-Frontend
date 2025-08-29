@@ -21,7 +21,7 @@ async function request<T>(
   const res = await fetch(`${BASE_URL}${url}`, {
     method,
     headers,
-    credentials: requireAuth ? "include" : "same-origin",
+    credentials: "include", //FIXME: ENV SPECIFIC
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
 
@@ -39,7 +39,6 @@ async function request<T>(
         break;
       case 401:
         errorMessage = "Unauthorized";
-        if (requireAuth) removeToken(); // Optional: trigger logout
         break;
       case 403:
         errorMessage = "Forbidden";
@@ -68,7 +67,7 @@ async function request<T>(
 
 // UNAUTHENTICATED
 export const get = <T>(url: string) => request<T>("GET", url);
-export const post = <T>(url: string, body: any ) =>
+export const post = <T>(url: string, body: any) =>
   request<T>("POST", url, body);
 
 // AUTHENTICATED

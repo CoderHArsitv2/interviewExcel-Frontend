@@ -66,7 +66,8 @@ export const AuthProvider = ({
       const payload = JSON.parse(atob(token.split(".")[1]));
       const exp = payload.exp;
       const now = Math.floor(Date.now() / 1000);
-      const timeUntilRefresh = (exp - now - 10) * 1;
+      const timeUntilRefresh = (exp - now - 10) * 1000;
+      console.log("timeUntilRefresh", timeUntilRefresh);
 
       if (refreshTimer) clearTimeout(refreshTimer);
 

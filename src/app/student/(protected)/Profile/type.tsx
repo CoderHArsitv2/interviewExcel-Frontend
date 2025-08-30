@@ -11,5 +11,8 @@ export type StudentProfileResponse = {
   batch:string;
   course:string;
   phone:string;
-
+  dob:string;
+  city:string;
+  about:string;
+  skills:string[];
 };

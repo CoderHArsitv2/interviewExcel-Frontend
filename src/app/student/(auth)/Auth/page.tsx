@@ -14,7 +14,7 @@ const SignUpStudent = () => {
 
   useEffect(() => {
     if (user) {
-      router.push("/student/Profile");
+      router.push("/student/profile");
     }
   }, [user]);
 

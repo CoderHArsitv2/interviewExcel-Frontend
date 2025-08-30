@@ -8,4 +8,8 @@ export type StudentProfileResponse = {
   avatar: string;
   bio: string;
   createdAt: string;
+  batch:string;
+  course:string;
+  phone:string;
+
 };

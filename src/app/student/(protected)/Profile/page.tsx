@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { StudentProfileResponse } from "./type";
+import FeatureCard from "@/app/components/FeatureCard";
 
 const StudentProfilePage = () => {
   const user = useAuthContext();
@@ -33,13 +34,13 @@ const StudentProfilePage = () => {
   }
 
   return (
-    <div className="w-[90vw] max-w-[1200px] mx-auto my-12">
+    <div className="w-[90vw] max-w-[1200px] mx-1 mb-10 my-12">
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Left Card: Profile */}
-        <Card className="flex flex-col items-center gap-4 rounded-3xl bg-white shadow-lg p-6 w-full md:w-[30%]">
-          <div className="relative w-36 h-36 rounded-full overflow-hidden shadow-xl border-4 border-blue-200">
+        {/* Left Card: Profile Overview */}
+        <Card className="flex flex-col items-center gap-4 bg-gray-100 rounded-3xl animate-fadeInUp border-theme shadow-blue-400  shadow-lg p-6 w-full md:w-[30%]">
+          <div className="relative w-50 h-50 rounded-full overflow-hidden shadow-xl border-4   border-theme shadow-xl shadow-blue-400">
             <Image
-              src="/interview_excel.png"
+              src="/default_profile.jpg"
               alt="Student Avatar"
               fill
               className="object-cover"
@@ -48,55 +49,79 @@ const StudentProfilePage = () => {
           <h2 className="text-2xl font-bold text-gray-800 text-center">
             {studentProfile?.name || "Harshit Saxena"}
           </h2>
-          <span className="text-gray-500 capitalize">
+          <span className="text-gray-500 capitalize tracking-wide">
             {studentProfile?.role || "Student"}
           </span>
-          <div className="flex gap-4 mt-4">
-            <div className="flex flex-col items-center">
-              <span className="font-bold text-lg">12</span>
-              <span className="text-gray-400 text-sm">Sessions</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="font-bold text-lg">48</span>
-              <span className="text-gray-400 text-sm">Points</span>
-            </div>
+
+          {/* Stats */}
+          <div className="flex gap-4 mt-6 w-full justify-center">
+            <FeatureCard title="12" description="Sessions" />
+            <FeatureCard title="50" description="Points" />
           </div>
-          <button className="mt-6 px-6 py-2 bg-theme hover:bg-blue-00 text-white rounded-full transition">
+
+          <button className="mt-6 px-6 py-2 bg-theme hover:bg-blue-900 text-white rounded-full shadow-md transition">
             Edit Profile
           </button>
         </Card>
 
-        {/* Right Card: Details */}
-        <Card className="flex flex-col gap-4 rounded-3xl bg-white shadow-lg p-6 w-full md:w-[65%]">
+        {/* Right Card: Detailed Info */}
+        <Card className="flex flex-col gap-6 animate-fadeInUp rounded-3xl border-theme bg- shadow-lg shadow-blue-400 p-6 w-full md:w-[65%]">
           <CardHeader>
-            <CardTitle className="text-xl font-bold text-gray-800">
+            <CardTitle className="text-xl font-bold text-theme">
               Student Details
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-gray-500 text-sm">Email</p>
-              <p className="text-gray-800 font-medium">
-                {studentProfile?.email || "harshit@example.com"}
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <DetailItem
+              label="Email"
+              value={studentProfile?.email || "harshit@example.com"}
+            />
+            <DetailItem
+              label="Phone"
+              value={studentProfile?.phone || "+91 1234567890"}
+            />
+            <DetailItem
+              label="Preparing For"
+              value={studentProfile?.course || "Software Developer"}
+            />
+            <DetailItem
+              label="Date Of Birth"
+              value={studentProfile?.dob || "04 April 2027"}
+            />
+            <DetailItem
+              label="My City"
+              value={studentProfile?.city || "Delhi"}
+            />
+
+            {/* About Me */}
+            <div className="col-span-1 md:col-span-2">
+              <p className="text-gray-500 text-sm mb-1">About Me</p>
+              <p className="text-gray-800 font-medium bg-blue-200 rounded-xl p-3">
+                {studentProfile?.about ||
+                  "Here to explore new opportunities and grow as a developer."}
               </p>
             </div>
-            <div>
-              <p className="text-gray-500 text-sm">Phone</p>
-              <p className="text-gray-800 font-medium">
-                {studentProfile?.phone || "+91 1234567890"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 text-sm">Course</p>
-              <p className="text-gray-800 font-medium">
-                {studentProfile?.course || "Computer Science"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 text-sm">Batch</p>
-              <p className="text-gray-800 font-medium">
-                {studentProfile?.batch || "2023-2027"}
-              </p>
+
+            {/* Skills */}
+            <div className="col-span-1 md:col-span-2">
+              <p className="text-gray-500 text-sm mb-2">Skills</p>
+              <div className="flex flex-wrap gap-2">
+                {(
+                  studentProfile?.skills || [
+                    "JavaScript",
+                    "React",
+                    "Next.js",
+                    "Node.js",
+                  ]
+                ).map((skill, i) => (
+                  <span
+                    key={i}
+                    className="px-3 py-1 bg-theme text-white text-sm rounded-full shadow-sm"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -104,5 +129,12 @@ const StudentProfilePage = () => {
     </div>
   );
 };
+
+const DetailItem = ({ label, value }: { label: string; value: string }) => (
+  <div>
+    <p className="text-gray-500 text-sm">{label}</p>
+    <p className="text-gray-800 font-medium">{value}</p>
+  </div>
+);
 
 export default StudentProfilePage;

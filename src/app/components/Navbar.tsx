@@ -21,10 +21,10 @@ export default function Navbar() {
 
         {/* Auth Buttons */}
         <div className="flex gap-2">
-          <Link href="/student/Auth">
+          <Link href="/student/auth">
             <Button variant="outline">Student Login</Button>
           </Link>
-          <Link href="/expert/auth/signin">
+          <Link href="/expert/auth">
             <Button>Expert Login</Button>
           </Link>
         </div>

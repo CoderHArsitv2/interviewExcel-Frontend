@@ -50,14 +50,14 @@ export const AuthProvider = ({
     if (token) {
       fetchUserFromToken(token);
     }else{
-      router.push(`/${userRole}/Auth`);
+      router.push(`/${userRole}/auth`);
     }
   }, []);
 
   const logout = () => {
     removeToken();
     setUser(null);
-    router.push(`/${userRole}/Auth`);
+    router.push(`/${userRole}/auth`);
     if (refreshTimer) clearTimeout(refreshTimer);
   };
 

@@ -75,3 +75,7 @@ export const authenticatedGet = <T>(url: string) =>
   request<T>("GET", url, undefined, true);
 export const authenticatedPost = <T>(url: string, body: any) =>
   request<T>("POST", url, body, true);
+export const authenticatedPut = <T>(url: string, body: any) =>
+  request<T>("PUT", url, body, true);
+export const authenticatedDelete = <T>(url: string) =>
+  request<T>("DELETE", url, undefined, true);

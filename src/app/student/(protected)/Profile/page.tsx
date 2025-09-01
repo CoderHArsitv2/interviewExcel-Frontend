@@ -6,18 +6,25 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { StudentProfileResponse } from "./type";
 import FeatureCard from "@/app/components/FeatureCard";
+import EditProfileModal from "@/app/components/EditProfileModal";
+import { authenticatedGet } from "@/providers/api";
 
 const StudentProfilePage = () => {
   const user = useAuthContext();
   const [studentProfile, setStudentProfile] =
     useState<StudentProfileResponse>();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSave = (updatedProfile: any) => {
+    setStudentProfile(updatedProfile);
+    // optionally call API to persist changes
+  };
 
   useEffect(() => {
     const fetchStudentProfile = async () => {
       try {
-        const res = await fetch("/api/student/profile");
-        const data = await res.json();
-        setStudentProfile(data);
+        const res = await authenticatedGet("/student/profile");
+        // setStudentProfile(res.data);
       } catch (error) {
         console.error("Error fetching student profile:", error);
       }
@@ -59,13 +66,31 @@ const StudentProfilePage = () => {
             <FeatureCard title="50" description="Points" />
           </div>
 
-          <button className="mt-6 px-6 py-2 bg-theme hover:bg-blue-900 text-white rounded-full shadow-md transition">
+          <button
+            className="mt-6 px-6 py-2 bg-theme hover:bg-blue-900 text-white rounded-full shadow-md transition"
+            onClick={() => setIsModalOpen(true)}
+          >
             Edit Profile
           </button>
         </Card>
+        <EditProfileModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          profile={{
+            name: studentProfile?.name || "",
+            phone: studentProfile?.phone || "",
+            city: studentProfile?.city || "",
+            date_of_birth: studentProfile?.dob || "",
+            preparing_for: studentProfile?.course || "",
+            about_me: studentProfile?.about || "",
+            skills: studentProfile?.skills || [],
+          }}
+          onSave={handleSave}
+          
+        />
 
         {/* Right Card: Detailed Info */}
-        <Card className="flex flex-col gap-6 animate-fadeInUp rounded-3xl border-theme bg- shadow-lg shadow-blue-400 p-6 w-full md:w-[65%]">
+        <Card className="flex flex-col gap-6 animate-fadeInUp rounded-3xl border-theme bg-gray-100 shadow-lg shadow-blue-400 p-6 w-full md:w-[65%]">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-theme">
               Student Details

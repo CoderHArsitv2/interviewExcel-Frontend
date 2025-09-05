@@ -32,7 +32,7 @@ export default function LoginForm({ setMode }: LoginFormProps) {
       toast.success("Sign In successful");
       reset();
       setToken(res.access_token);
-      router.push("/student/Profile");
+      router.push("/student/profile");
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Sign In failed");
@@ -47,7 +47,7 @@ export default function LoginForm({ setMode }: LoginFormProps) {
         role: "student",
       });
       localStorage.setItem("access_token", res.access_token);
-      router.push("/student/Profile");
+      router.push("/student/profile");
     } catch (err: any) {
       console.error(err);
       toast.error("Google sign-in failed");

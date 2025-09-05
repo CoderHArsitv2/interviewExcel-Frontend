@@ -1,18 +1,14 @@
-
-
-
 export type StudentProfileResponse = {
+  user_uuid: string;
   name: string;
-  email: string;
   role: string;
-  avatar: string;
-  bio: string;
-  createdAt: string;
-  batch:string;
-  course:string;
-  phone:string;
-  dob:string;
-  city:string;
-  about:string;
-  skills:string[];
+  email: string;
+  phone: string;
+  sessions: string;
+  points: string;
+  preparing_for: string;
+  dob: string;
+  city: string;
+  about_me: string;
+  skills: string[];
 };

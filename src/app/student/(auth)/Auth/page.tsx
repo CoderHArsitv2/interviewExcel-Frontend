@@ -29,7 +29,7 @@ const SignUpStudent = () => {
         <button
           className="absolute  top-6 md:top-12 right-6 md:right-16 bg-white text-black p-2 rounded-full hover:bg-sky-900 hover:text-white transition"
           onClick={() => {
-            router.back();
+            router.push("/");
           }}
         >
           <X size={20} />

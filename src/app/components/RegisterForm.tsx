@@ -11,6 +11,7 @@ import Image from "next/image";
 import { StudentSignUpFormValues } from "@/types/schemas/SignUpSchema";
 import { Fields, signUpFormFields } from "@/types/formConfig";
 import toast from "react-hot-toast";
+import { setToken } from "@/providers/authProvider";
 
 interface RegisterFormProps {
   setMode: React.Dispatch<React.SetStateAction<"signin" | "signup">>;
@@ -30,11 +31,18 @@ export default function RegisterForm(props: RegisterFormProps) {
     },
   });
 
-  const { handleSubmit, formState } = methods;
+  const { handleSubmit, reset, formState } = methods;
 
   const onSubmit = async (data: StudentSignUpFormValues) => {
     try {
-      await post("/auth/register", { ...data, role: "student" });
+      const res: any = await post("/auth/register", {
+        ...data,
+        role: "student",
+      });
+      toast.success("Sign In successful");
+      reset();
+      setToken(res.access_token);
+      router.push("/student/profile");
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Sign Up failed");
@@ -49,7 +57,7 @@ export default function RegisterForm(props: RegisterFormProps) {
         role: "student",
       });
       localStorage.setItem("access_token", res.access_token);
-      router.push("/student/Profile");
+      router.push("/student/profile");
     } catch (err: any) {
       console.error(err);
       toast.error("Google sign-in failed");

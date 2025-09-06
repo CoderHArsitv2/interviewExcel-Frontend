@@ -72,8 +72,8 @@ export const signInFormFields = {
 export const editProfileFormFields = {
   fields: [
     {
-      name: "name",
-      label: "Name",
+      name: "full_name",
+      label: "Full Name",
       type: "text",
       required: true,
       placeholder: "Enter your name",
@@ -93,7 +93,7 @@ export const editProfileFormFields = {
       placeholder: "Enter your city",
     },
     {
-      name: "date_of_birth",
+      name: "dob",
       label: "Date of Birth",
       type: "date",
       required: true,

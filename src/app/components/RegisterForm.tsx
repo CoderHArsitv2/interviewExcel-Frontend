@@ -15,9 +15,10 @@ import { setToken } from "@/providers/authProvider";
 
 interface RegisterFormProps {
   setMode: React.Dispatch<React.SetStateAction<"signin" | "signup">>;
+  role: string;
 }
 
-export default function RegisterForm(props: RegisterFormProps) {
+export default function RegisterForm({setMode,role}: RegisterFormProps) {
   const router = useRouter();
 
   const methods = useForm<StudentSignUpFormValues>({
@@ -37,12 +38,12 @@ export default function RegisterForm(props: RegisterFormProps) {
     try {
       const res: any = await post("/auth/register", {
         ...data,
-        role: "student",
+        role: role,
       });
       toast.success("Sign In successful");
       reset();
       setToken(res.access_token);
-      router.push("/student/profile");
+      router.push(`/${role}/profile`);
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Sign Up failed");
@@ -54,10 +55,10 @@ export default function RegisterForm(props: RegisterFormProps) {
     try {
       const res: any = await post("/auth/google/login", {
         token: credentialResponse.credential,
-        role: "student",
+        role: role,
       });
       localStorage.setItem("access_token", res.access_token);
-      router.push("/student/profile");
+      router.push(`/${role}/profile`);
     } catch (err: any) {
       console.error(err);
       toast.error("Google sign-in failed");
@@ -84,7 +85,7 @@ export default function RegisterForm(props: RegisterFormProps) {
       {/* Form Card */}
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl shadow-gray-900 md:shadow-gray-900 p-6 sm:p-8 animate-fadeInUp">
         <h1 className="text-2xl font-bold mb-4 text-gray-800 text-center">
-          Student Sign Up
+          {role.charAt(0).toUpperCase() + role.slice(1)} Sign Up
         </h1>
 
         <FormProvider {...methods}>
@@ -135,7 +136,7 @@ export default function RegisterForm(props: RegisterFormProps) {
         <p className="mt-6 text-center text-sm text-gray-600">
           Already have an account?{" "}
           <button
-            onClick={() => props.setMode("signin")}
+            onClick={() => setMode("signin")}
             className="text-blue-600 font-semibold hover:underline"
           >
             Sign In

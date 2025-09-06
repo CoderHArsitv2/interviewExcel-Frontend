@@ -14,7 +14,7 @@ import {
   Path,
   useForm,
 } from "react-hook-form";
-import { authenticatedPost, post } from "@/providers/api";
+import { authenticatedPost, authenticatedPut, post } from "@/providers/api";
 import toast from "react-hot-toast";
 import { editProfileFormFields, Fields } from "@/types/formConfig";
 import { EditProfileFormValues } from "@/types/schemas/EditProfileSchema";
@@ -49,13 +49,13 @@ export default function EditProfileModal({
 }: EditProfileModalProps) {
   const methods = useForm<EditProfileFormValues>({
     defaultValues: {
-      name: profile.name,
+      full_name: profile.name,
       phone: profile.phone,
       city: profile.city,
-      date_of_birth: profile.date_of_birth,
+      dob: profile.date_of_birth,
       preparing_for: profile.preparing_for,
       about_me: profile.about_me, ////
-      skills: profile.skills,
+      skills: profile.skills.join(", "),
     },
   });
 
@@ -63,9 +63,14 @@ export default function EditProfileModal({
 
   const onSubmit = async (data: EditProfileFormValues) => {
     try {
-      const res: any = await authenticatedPost("/student/profile", {
+      const formattedDOB = data.dob
+        ? new Date(data.dob).toISOString() // "YYYY-MM-DDT00:00:00.000Z"
+        : null;
+      const res: any = await authenticatedPut("/student/profile", {
         ...data,
         role: "student",
+        dob: formattedDOB,
+        skills: data.skills?.split(","),
       });
       toast.success("Profile updated successfully");
       reset();
@@ -79,7 +84,7 @@ export default function EditProfileModal({
     Omit<Fields, "name"> & { name: Path<EditProfileFormValues> }
   >;
   return (
-    <Dialog open={isOpen}  onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-sm bg-white border-theme  rounded-lg p-6">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>

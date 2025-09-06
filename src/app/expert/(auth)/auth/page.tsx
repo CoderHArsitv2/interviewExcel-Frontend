@@ -13,15 +13,15 @@ const SignUpStudent = () => {
   const { user } = useAuthContext();
 
   useEffect(() => {
-    if (user && user.role === "student") {
-      router.push("/student/profile");
+    if (user && user.role === "expert") {
+      router.push("/expert/profile");
     }
   }, [user]);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Left Slider (Hidden on mobile) */}
-      <LeftSection role="student" />
+      <LeftSection role="expert" />
 
       {/* Right Form */}
       <div className="relative flex w-full md:w-1/2 items-center flex-col bg-sky-900 md:bg-gray-300 md:justify-center p-8">
@@ -36,9 +36,9 @@ const SignUpStudent = () => {
         </button>
 
         {mode === "signup" ? (
-          <RegisterForm role="student" setMode={setMode} />
+          <RegisterForm role="expert" setMode={setMode} />
         ) : (
-          <LoginForm role="student" setMode={setMode} />
+          <LoginForm role="expert" setMode={setMode} />
         )}
       </div>
     </div>

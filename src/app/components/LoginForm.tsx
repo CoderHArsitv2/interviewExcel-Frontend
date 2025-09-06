@@ -11,9 +11,10 @@ import { setToken } from "@/providers/authProvider";
 
 interface LoginFormProps {
   setMode: React.Dispatch<React.SetStateAction<"signin" | "signup">>;
+  role: string;
 }
 
-export default function LoginForm({ setMode }: LoginFormProps) {
+export default function LoginForm({ setMode, role }: LoginFormProps) {
   const router = useRouter();
 
   const methods = useForm<StudentSignInFormValues>({
@@ -28,11 +29,11 @@ export default function LoginForm({ setMode }: LoginFormProps) {
 
   const onSubmit = async (data: StudentSignInFormValues) => {
     try {
-      const res: any = await post("/auth/signin", { ...data, role: "student" });
+      const res: any = await post("/auth/signin", { ...data, role: role });
       toast.success("Sign In successful");
       reset();
       setToken(res.access_token);
-      router.push("/student/profile");
+      router.push(`/${role}/profile`);
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Sign In failed");
@@ -44,10 +45,10 @@ export default function LoginForm({ setMode }: LoginFormProps) {
     try {
       const res: any = await post("/auth/google/login", {
         token: credentialResponse.credential,
-        role: "student",
+        role: role,
       });
       localStorage.setItem("access_token", res.access_token);
-      router.push("/student/profile");
+      router.push(`/${role}/profile`);
     } catch (err: any) {
       console.error(err);
       toast.error("Google sign-in failed");
@@ -76,7 +77,7 @@ export default function LoginForm({ setMode }: LoginFormProps) {
         {/* Form Card */}
         <div className="w-full min-w-xs sm:min-w-sm bg-white rounded-2xl shadow-2xl shadow-gray-900 md:shadow-gray-900 p-6 sm:p-8 animate-fadeInUp">
           <h1 className="text-2xl font-bold mb-4 text-gray-800 text-center">
-            Student Sign In
+            {role.charAt(0).toUpperCase() + role.slice(1)} Sign In
           </h1>
 
           <FormProvider {...methods}>

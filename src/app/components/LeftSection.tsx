@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
-const features = [
+type Role = "student" | "expert";
+
+const studentFeatures = [
   {
     title: "Welcome Back!",
     description: "Sign in to continue your learning journey with us.",
@@ -18,14 +20,37 @@ const features = [
   },
 ];
 
-export const LeftSection = () => {
+const expertFeatures = [
+  {
+    title: "Welcome Mentor!",
+    description: "Sign in to connect with students and share your expertise.",
+  },
+  {
+    title: "Grow Your Network",
+    description: "Build credibility and expand your professional reach.",
+  },
+  {
+    title: "Make an Impact",
+    description: "Guide learners and help them achieve their career goals.",
+  },
+];
+
+interface LeftSectionProps {
+  role: Role;
+}
+
+export const LeftSection: React.FC<LeftSectionProps> = ({ role }) => {
+  const features = role === "student" ? studentFeatures : expertFeatures;
+
   const [current, setCurrent] = useState(0);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % features.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [features.length]);
+
   return (
     <div className="hidden md:flex w-1/2 bg-sky-900 text-white flex-col items-center relative overflow-hidden">
       <div>
@@ -35,7 +60,7 @@ export const LeftSection = () => {
           width={200}
           height={200}
           className="right-10 justify-center mt-10"
-        ></Image>
+        />
       </div>
       <div className="inset-0 flex items-center justify-center p-25 mt-20">
         <Image
@@ -44,7 +69,7 @@ export const LeftSection = () => {
           width={200}
           height={200}
           className="top-10 right-10"
-        ></Image>
+        />
         <AnimatePresence mode="wait">
           <motion.div
             key={current}

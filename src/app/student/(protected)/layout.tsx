@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider } from "@/providers/authProvider";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -13,6 +12,7 @@ export default function StudentProtectedLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+
 
   // Map pathname → heading
   const pageHeading = useMemo(() => {

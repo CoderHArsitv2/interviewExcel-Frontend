@@ -8,19 +8,21 @@ import { StudentProfileResponse } from "./type";
 import FeatureCard from "@/app/components/FeatureCard";
 import EditProfileModal from "@/app/components/EditProfileModal";
 import { authenticatedGet } from "@/providers/api";
+import { useRouter } from "next/navigation";
 
 const StudentProfilePage = () => {
-  const user = useAuthContext();
+  const { user } = useAuthContext();
   const [studentProfile, setStudentProfile] =
     useState<StudentProfileResponse | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleSave = (updatedProfile: any) => {
-    setStudentProfile(updatedProfile);
-    // optionally call API to persist changes
-  };
-
+  const router = useRouter();
+  useEffect(() => {
+    if (user && user.role !== "expert") {
+      router.replace(`/${user.role}/profile`);
+    }
+  }, [user]);
   useEffect(() => {
     const fetchStudentProfile = async () => {
       try {
@@ -36,7 +38,7 @@ const StudentProfilePage = () => {
       }
     };
     fetchStudentProfile();
-  }, []);
+  }, [isModalOpen]);
 
   if (!user) {
     return (
@@ -46,6 +48,7 @@ const StudentProfilePage = () => {
     );
   }
 
+  console.log("preparing for ", studentProfile?.full_name);
   return (
     <div className="w-[90vw] max-w-[1200px] mx-1 mb-10 my-12">
       {isLoading ? (
@@ -65,7 +68,7 @@ const StudentProfilePage = () => {
               />
             </div>
             <h2 className="text-2xl font-bold text-gray-800 text-center">
-              {studentProfile?.name || ""}
+              {studentProfile?.full_name || ""}
             </h2>
             <span className="text-gray-500 capitalize tracking-wide">
               {studentProfile?.role || ""}
@@ -74,10 +77,12 @@ const StudentProfilePage = () => {
             {/* Stats */}
             <div className="flex gap-4 mt-6 w-full justify-center">
               <FeatureCard
+                role="student"
                 title={studentProfile.sessions || "-"}
                 description="Sessions"
               />
               <FeatureCard
+                role="student"
                 title={studentProfile.points || "-"}
                 description="Points"
               />
@@ -94,15 +99,17 @@ const StudentProfilePage = () => {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             profile={{
-              name: studentProfile?.name || "",
+              name: studentProfile?.full_name || "",
               phone: studentProfile?.phone || "",
               city: studentProfile?.city || "",
-              date_of_birth: studentProfile?.dob || "",
+              dob: studentProfile?.dob || "",
               preparing_for: studentProfile?.preparing_for || "",
               about_me: studentProfile?.about_me || "",
               skills: studentProfile?.skills || [],
             }}
-            onSave={handleSave}
+            onSave={(updatedProfile) => {
+              setIsModalOpen(false); // modal closes
+            }}
           />
 
           {/* Right Card: Detailed Info */}

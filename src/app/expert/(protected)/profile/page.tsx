@@ -4,38 +4,60 @@ import { useAuthContext } from "@/providers/authProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import { StudentProfileResponse } from "./type";
+import { authenticatedGet } from "@/providers/api";
+import { formatDate, formatDateForInput } from "@/utils/helpers";
 import FeatureCard from "@/app/components/FeatureCard";
 import EditProfileModal from "@/app/components/EditProfileModal";
-import { authenticatedGet } from "@/providers/api";
+import { useRouter } from "next/navigation";
 
-const StudentProfilePage = () => {
-  const user = useAuthContext();
-  const [studentProfile, setStudentProfile] =
-    useState<StudentProfileResponse | null>(null);
+// Types (adjust as per your backend response for experts)
+interface ExpertProfileResponse {
+  full_name: string;
+  email: string;
+  phone: string;
+  city: string;
+  dob: string;
+  about_me: string;
+  expertise: string[];
+  role: string;
+  sessions: number;
+  students_mentored: number;
+  experience_years: number;
+}
+
+const ExpertProfilePage = () => {
+  const router = useRouter();
+  const { user } = useAuthContext();
+  const [expertProfile, setExpertProfile] =
+    useState<ExpertProfileResponse | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleSave = (updatedProfile: any) => {
-    setStudentProfile(updatedProfile);
+    setExpertProfile(updatedProfile);
     // optionally call API to persist changes
   };
+  useEffect(() => {
+    if (user && user.role !== "expert") {
+      router.replace(`/${user.role}/profile`);
+    }
+  }, [user]);
 
   useEffect(() => {
-    const fetchStudentProfile = async () => {
+    const fetchExpertProfile = async () => {
       try {
         setIsLoading(true);
-        const res: StudentProfileResponse = await authenticatedGet(
+        const res: ExpertProfileResponse = await authenticatedGet(
           "/expert/profile"
         );
-        setStudentProfile(res);
+        setExpertProfile(res);
       } catch (error) {
-        console.error("Error fetching student profile:", error);
+        console.error("Error fetching expert profile:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchStudentProfile();
+    fetchExpertProfile();
   }, []);
 
   if (!user) {
@@ -52,39 +74,46 @@ const StudentProfilePage = () => {
         <div className="flex h-[80vh] items-center justify-center text-gray-500">
           Loading profile...
         </div>
-      ) : studentProfile !== null ? (
+      ) : expertProfile !== null ? (
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left Card: Profile Overview */}
-          <Card className="flex flex-col items-center gap-4 bg-gray-100 rounded-3xl animate-fadeInUp border-theme shadow-blue-400  shadow-lg p-6 w-full md:w-[30%]">
-            <div className="relative w-50 h-50 rounded-full overflow-hidden shadow-xl border-4   border-theme shadow-xl shadow-blue-400">
+          <Card className="flex flex-col items-center gap-4 bg-gray-100 rounded-3xl animate-fadeInUp border border-expert shadow-lg shadow-[#805617] p-6 w-full md:w-[30%]">
+            <div className="relative w-50 h-50 rounded-full overflow-hidden shadow-xl border-4 border-[#805617] shadow-lg shadow-[#805617]">
               <Image
-                src={`/profile.jpg`}
-                alt="Student Avatar"
+                src={`/mascot.png`}
+                alt="Expert Avatar"
                 fill
-                className="object-cover"
+                className="object-fill"
               />
             </div>
             <h2 className="text-2xl font-bold text-gray-800 text-center">
-              {studentProfile?.full_name}
+              {expertProfile?.full_name}
             </h2>
             <span className="text-gray-500 capitalize tracking-wide">
-              {studentProfile?.role || ""}
+              {expertProfile?.role || "Expert"}
             </span>
 
             {/* Stats */}
             <div className="flex gap-4 mt-6 w-full justify-center">
               <FeatureCard
-                title={studentProfile.sessions || "-"}
+                role="expert"
+                title={String(expertProfile.sessions || "-")}
                 description="Sessions"
               />
               <FeatureCard
-                title={studentProfile.points || "-"}
-                description="Points"
+                role="expert"
+                title={String(expertProfile.students_mentored || "-")}
+                description="Students"
+              />
+              <FeatureCard
+                role="expert"
+                title={String(expertProfile.experience_years || "-")}
+                description="Years Exp."
               />
             </div>
 
             <button
-              className="mt-6 px-6 py-2 bg-theme hover:bg-blue-900 text-white rounded-full shadow-md transition"
+              className="mt-6 px-6 py-2 bg-[#805617] hover:bg-[#805617] text-white rounded-full shadow-md transition"
               onClick={() => setIsModalOpen(true)}
             >
               Edit Profile
@@ -94,60 +123,55 @@ const StudentProfilePage = () => {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             profile={{
-              name: studentProfile?.full_name || "",
-              phone: studentProfile?.phone || "",
-              city: studentProfile?.city || "",
-              date_of_birth: studentProfile?.dob || "",
-              preparing_for: studentProfile?.preparing_for || "",
-              about_me: studentProfile?.about_me || "",
-              skills: studentProfile?.skills || [],
+              name: expertProfile?.full_name || "",
+              phone: expertProfile?.phone || "",
+              city: expertProfile?.city || "",
+              dob: formatDateForInput(expertProfile?.dob),
+              about_me: expertProfile?.about_me || "",
+              expertise: expertProfile?.expertise || [],
             }}
             onSave={handleSave}
           />
 
           {/* Right Card: Detailed Info */}
-          <Card className="flex flex-col gap-6 animate-fadeInUp rounded-3xl border-theme bg-gray-100 shadow-lg shadow-blue-400 p-6 w-full md:w-[65%]">
+          <Card className="flex flex-col gap-6 animate-fadeInUp rounded-3xl border border-[#805617] bg-gray-100 shadow-lg shadow-[#805617] p-6 w-full md:w-[65%]">
             <CardHeader>
-              <CardTitle className="text-xl font-bold text-theme">
-                Student Details
+              <CardTitle className="text-xl font-bold text-[#805617]">
+                Expert Details
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <DetailItem label="Email" value={studentProfile?.email || "-"} />
-              <DetailItem label="Phone" value={studentProfile?.phone || "-"} />
-              <DetailItem
-                label="Preparing For"
-                value={studentProfile?.preparing_for || "-"}
-              />
+              <DetailItem label="Email" value={expertProfile?.email || "-"} />
+              <DetailItem label="Phone" value={expertProfile?.phone || "-"} />
               <DetailItem
                 label="Date Of Birth"
-                value={studentProfile?.dob || "-"}
+                value={formatDate(expertProfile?.dob)}
               />
-              <DetailItem label="My City" value={studentProfile?.city || "-"} />
+              <DetailItem label="My City" value={expertProfile?.city || "-"} />
 
               {/* About Me */}
               <div className="col-span-1 md:col-span-2">
                 <p className="text-gray-500 text-sm mb-1">About Me</p>
-                <p className="text-gray-800 font-medium bg-blue-200 rounded-xl p-3">
-                  {studentProfile?.about_me || "-"}
+                <p className="text-gray-800 font-medium bg-[#d2aa6f] rounded-xl p-3">
+                  {expertProfile?.about_me || "-"}
                 </p>
               </div>
 
-              {/* Skills */}
+              {/* Expertise */}
               <div className="col-span-1 md:col-span-2">
-                <p className="text-gray-500 text-sm mb-2">Skills</p>
+                <p className="text-gray-500 text-sm mb-2">Expertise</p>
                 <div className="flex flex-wrap gap-2">
-                  {studentProfile.skills ? (
-                    (studentProfile?.skills).map((skill, i) => (
+                  {expertProfile.expertise ? (
+                    (expertProfile?.expertise).map((skill, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1 bg-theme text-white text-sm rounded-full shadow-sm"
+                        className="px-3 py-1 bg-[#805617;] text-white text-sm rounded-full shadow-sm"
                       >
                         {skill}
                       </span>
                     ))
                   ) : (
-                    <span className="px-3 py-1 bg-theme text-white text-sm rounded-full shadow-sm">
+                    <span className="px-3 py-1 bg-[#805617;] text-white text-sm rounded-full shadow-sm">
                       -
                     </span>
                   )}
@@ -172,4 +196,4 @@ const DetailItem = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-export default StudentProfilePage;
+export default ExpertProfilePage;

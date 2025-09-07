@@ -1,6 +1,6 @@
 export type StudentProfileResponse = {
   user_uuid: string;
-  name: string;
+  full_name: string;
   role: string;
   email: string;
   phone: string;

@@ -30,6 +30,12 @@
   .bg-theme{
     background-color: #115a84
   }
+  .bg-expert{
+    background-color: #805617;
+  }
+  .border-expert{
+    border-color: #805617;
+  }
   .theme {
     color:#115a84
   }

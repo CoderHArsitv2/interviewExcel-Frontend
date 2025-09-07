@@ -7,7 +7,7 @@ import { AppSidebar } from "@/app/components/app-sidebar";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
-export default function StudentProtectedLayout({
+export default function ExpertProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -23,19 +23,19 @@ export default function StudentProtectedLayout({
       "/expert/home": "Home",
     };
 
-    return mapping[pathname] || "Student Portal";
+    return mapping[pathname] || "Expert Portal";
   }, [pathname]);
 
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
-      <AuthProvider userRole="student">
+      <AuthProvider userRole="expert">
         <SidebarProvider defaultOpen>
           <div className="flex h-screen">
             <AppSidebar />
             <main className="flex-1 p-4">
               <div className="flex items-center  gap-4 mb-2">
                 <SidebarTrigger className="mb-4" />
-                <h1 className="text-3xl font-bold mb-6 text-theme border-b-4  border-theme inline-block pb-2 tracking-wide">
+                <h1 className="text-3xl font-bold mb-6 text-theme border-b-4  border-expert inline-block pb-2 tracking-wide">
                   {pageHeading}
                 </h1>
               </div>

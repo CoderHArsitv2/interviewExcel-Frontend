@@ -26,10 +26,11 @@ interface EditProfileModalProps {
     name: string;
     phone?: string;
     city: string;
-    date_of_birth: string;
-    preparing_for: string;
+    dob: string;
+    preparing_for?: string;
     about_me: string;
-    skills: string[];
+    skills?: string[];
+    expertise?: string[];
   };
   onSave: (updatedProfile: any) => void;
 }
@@ -52,10 +53,10 @@ export default function EditProfileModal({
       full_name: profile.name,
       phone: profile.phone,
       city: profile.city,
-      dob: profile.date_of_birth,
+      dob: profile.dob,
       preparing_for: profile.preparing_for,
       about_me: profile.about_me, ////
-      skills: profile.skills.join(", "),
+      skills: profile.skills?.join(", "),
     },
   });
 
@@ -63,20 +64,25 @@ export default function EditProfileModal({
 
   const onSubmit = async (data: EditProfileFormValues) => {
     try {
-      const formattedDOB = data.dob
-        ? new Date(data.dob).toISOString() // "YYYY-MM-DDT00:00:00.000Z"
-        : null;
+      const formattedDOB = data.dob ? new Date(data.dob).toISOString() : null;
+
       const res: any = await authenticatedPut("/student/profile", {
         ...data,
         role: "student",
-        dob: formattedDOB,
-        skills: data.skills?.split(","),
+        dob: formattedDOB, // better keep consistent key name
+        skills: data.skills?.split(",").map((s) => s.trim()),
       });
+
       toast.success("Profile updated successfully");
-      reset();
+
+      reset(res?.data);
+      onSave(res?.data);
+
+      // close modal
+      onClose();
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Sign In failed");
+      toast.error(err.message || "Profile update failed");
     }
   };
 

@@ -16,21 +16,33 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/providers/authProvider"; // for logout function
 
-const items = [
-  { title: "Home", url: "/student/home", icon: Home },
-  { title: "Profile", url: "/student/profile", icon: User },
-  { title: "Sessions", url: "/student/sessions", icon: Calendar },
-  { title: "Help", url: "/student/help", icon: HelpCircle },
-];
-
 export function AppSidebar() {
   const pathname = usePathname();
   const { state } = useSidebar(); // "expanded" or "collapsed"
-  const { logout } = useAuthContext(); // assume this exists
+  const { logout, user } = useAuthContext(); // assume this exists
+
+  // build base path depending on role
+  const basePath = user?.role === "expert" ? "/expert" : "/student";
+
+  const items = [
+    { title: "Home", url: `${basePath}/home`, icon: Home },
+    { title: "Profile", url: `${basePath}/profile`, icon: User },
+    { title: "Sessions", url: `${basePath}/sessions`, icon: Calendar },
+    { title: "Help", url: `${basePath}/help`, icon: HelpCircle },
+  ];
 
   return (
-    <Sidebar collapsible="icon" className="bg-theme text-white">
-      <SidebarContent className="bg-theme">
+    <Sidebar
+      collapsible="icon"
+      className={`${
+        user?.role === "expert" ? "bg-expert" : "bg-theme"
+      } text-white`}
+    >
+      <SidebarContent
+        className={`${
+          user?.role === "expert" ? "bg-expert" : "bg-theme"
+        }`}
+      >
         <SidebarGroup>
           <SidebarHeader className="flex items-center gap-2 text-2xl font-bold text-white">
             {state === "expanded" ? "Interview Excel" : "IE"}
@@ -46,11 +58,11 @@ export function AppSidebar() {
                       <Link
                         href={item.url}
                         className={`flex items-center gap-2 rounded-lg px-3 py-2 transition-colors
-                      ${
-                        isActive
-                          ? "bg-white text-blue-950 font-bold"
-                          : "text-gray-200 hover:bg-white/20"
-                      }`}
+                          ${
+                            isActive
+                              ? "bg-white text-blue-950 font-bold"
+                              : "text-gray-200 hover:bg-white/20"
+                          }`}
                       >
                         <item.icon className="w-5 h-5" />
                         {state === "expanded" && <span>{item.title}</span>}

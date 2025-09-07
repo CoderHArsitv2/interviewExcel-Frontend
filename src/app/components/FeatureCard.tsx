@@ -6,10 +6,17 @@ interface props {
   image?: string;
   buttonText?: string;
   buttonLink?: string;
+  role: string;
 }
+
 const FeatureCard = (props: props) => {
+  console.log("role: ",props.role)
   return (
-    <div className="flex flex-col items-center bg-blue-200 rounded-xl px-4 py-2 shadow-sm w-1/2">
+    <div
+      className={`flex flex-col items-center ${
+        props.role === "expert" ? "bg-[#d2aa6f]" : "bg-blue-200"
+      } rounded-xl px-4 py-2 shadow-sm w-1/2`}
+    >
       <span className="font-bold text-lg text-theme">{props.title}</span>
       <span className="text-gray-700 text-sm">{props.description}</span>
     </div>

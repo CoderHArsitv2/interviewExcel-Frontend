@@ -35,7 +35,7 @@ export default function ExpertProtectedLayout({
             <main className="flex-1 p-4">
               <div className="flex items-center  gap-4 mb-2">
                 <SidebarTrigger className="mb-4" />
-                <h1 className="text-3xl font-bold mb-6 text-theme border-b-4  border-expert inline-block pb-2 tracking-wide">
+                <h1 className="text-3xl font-bold mb-6 text-theme border-b-4  border-teal-800 inline-block pb-2 tracking-wide">
                   {pageHeading}
                 </h1>
               </div>

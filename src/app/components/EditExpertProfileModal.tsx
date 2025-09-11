@@ -5,23 +5,34 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FormProvider, get, Path, useForm, FieldErrors, FieldValues } from "react-hook-form";
+import {
+  FormProvider,
+  get,
+  Path,
+  useForm,
+  FieldErrors,
+  FieldValues,
+} from "react-hook-form";
 import { authenticatedPut } from "@/providers/api";
 import toast from "react-hot-toast";
 import { Fields, editExpertProfileFormFields } from "@/types/formConfig";
-import { EditExpertProfileFormValues } from "@/types/schemas/EditExpertProfileSchema"; 
+import { EditExpertProfileFormValues } from "@/types/schemas/EditExpertProfileSchema";
 
 interface EditExpertProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   profile: {
-    name: string;
-    bio?: string;
-    expertise: string;
-    experience_years: number;
-    fees_per_session: number;
-    profile_picture_url?: string;
-    skills?: string[];
+    full_name: string;
+    expertise: string; // convert array → comma string
+    fees_per_session: number | null;
+    profile_picture_url: string;
+    skills: string; // convert array → comma string
+    about_me: string;
+    experience: string;
+    achievements: string;
+    city: string;
+    dob: string;
+    phone: string;
   };
   onSave: (updatedProfile: any) => void;
 }
@@ -39,29 +50,31 @@ export default function EditExpertProfileModal({
   profile,
   onSave,
 }: EditExpertProfileModalProps) {
-const methods = useForm<EditExpertProfileFormValues>({
-  defaultValues: {
-    full_name: profile.name,
-    expertise: profile.expertise || "",  // convert array → comma string
-    fees_per_session: profile.fees_per_session || null,
-    profile_picture_url: profile.profile_picture_url || "",
-    skills: profile.skills?.join(", ") || "",       // convert array → comma string
-    about_me: "",
-    experience: "",
-    achievements: "",
-    city:  "",
-    dob:"",
-    phone: "",
-  },
-});
+  const methods = useForm<EditExpertProfileFormValues>({
+    defaultValues: {
+      full_name: profile.full_name,
+      expertise: profile.expertise || "", // convert array → comma string
+      fees_per_session: profile.fees_per_session || null,
+      profile_picture_url: profile.profile_picture_url || "",
+      skills: profile.skills || "", // convert array → comma string
+      about_me: "",
+      experience: "",
+      achievements: "",
+      city: "",
+      dob: "",
+      phone: "",
+    },
+  });
 
   const { handleSubmit, reset, formState } = methods;
 
   const onSubmit = async (data: EditExpertProfileFormValues) => {
     try {
+        const formattedDOB = data.dob ? new Date(data.dob).toISOString() : null;
       const res: any = await authenticatedPut("/expert/profile", {
         ...data,
         role: "expert",
+        dob: formattedDOB,
         skills: data.skills?.split(",").map((s) => s.trim()),
       });
 

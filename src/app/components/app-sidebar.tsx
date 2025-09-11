@@ -35,12 +35,12 @@ export function AppSidebar() {
     <Sidebar
       collapsible="icon"
       className={`${
-        user?.role === "expert" ? "bg-expert" : "bg-theme"
+        user?.role === "expert" ? "bg-teal-800" : "bg-theme"
       } text-white`}
     >
       <SidebarContent
         className={`${
-          user?.role === "expert" ? "bg-expert" : "bg-theme"
+          user?.role === "expert" ? "bg-teal-800" : "bg-theme"
         }`}
       >
         <SidebarGroup>

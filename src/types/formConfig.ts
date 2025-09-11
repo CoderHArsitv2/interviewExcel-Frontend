@@ -1,6 +1,7 @@
 import { studentSignUpSchema } from "./schemas/SignUpSchema";
 import { studentSignInSchema } from "./schemas/SignInSchema";
 import { editProfileSchema } from "./schemas/EditProfileSchema";
+import { editExpertProfileSchema } from "./schemas/EditExpertProfileSchema";
 
 export interface Fields {
   name: string;
@@ -122,4 +123,74 @@ export const editProfileFormFields = {
     },
   ],
   schema: editProfileSchema,
+};
+
+
+export const editExpertProfileFormFields = {
+  fields: [
+    {
+      name: "full_name",
+      label: "Full Name",
+      type: "text",
+      required: true,
+      placeholder: "Enter your full name",
+    },
+    {
+      name: "phone",
+      label: "Phone",
+      type: "text",
+      required: true,
+      placeholder: "Enter your phone number",
+    },
+    {
+      name: "city",
+      label: "City",
+      type: "text",
+      required: true,
+      placeholder: "Enter your city",
+    },
+    {
+      name: "dob",
+      label: "Date of Birth",
+      type: "date",
+      required: true,
+      placeholder: "Enter your date of birth",
+    },
+    {
+      name: "about_me",
+      label: "About Me",
+      type: "textarea",
+      required: true,
+      placeholder: "Tell us about yourself",
+    },
+    {
+      name: "skills",
+      label: "Skills",
+      type: "text",
+      required: true,
+      placeholder: "Enter your skills separated by commas",
+    },
+    {
+      name: "expertise",
+      label: "Expertise",
+      type: "text",
+      required: true,
+      placeholder: "Enter your areas of expertise (comma separated)",
+    },
+    {
+      name: "experience",
+      label: "Experience",
+      type: "text",
+      required: false,
+      placeholder: "Years of experience or description",
+    },
+    {
+      name: "achievements",
+      label: "Achievements",
+      type: "textarea",
+      required: false,
+      placeholder: "List your achievements, separated by commas",
+    },
+  ],
+  schema: editExpertProfileSchema,
 };

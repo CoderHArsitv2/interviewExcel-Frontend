@@ -157,13 +157,6 @@ export const editExpertProfileFormFields = {
       placeholder: "Enter your date of birth",
     },
     {
-      name: "about_me",
-      label: "About Me",
-      type: "textarea",
-      required: true,
-      placeholder: "Tell us about yourself",
-    },
-    {
       name: "skills",
       label: "Skills",
       type: "text",
@@ -178,11 +171,11 @@ export const editExpertProfileFormFields = {
       placeholder: "Enter your areas of expertise (comma separated)",
     },
     {
-      name: "experience",
+      name: "experience_years",
       label: "Experience",
-      type: "text",
+      type: "number",
       required: false,
-      placeholder: "Years of experience or description",
+      placeholder: "Years of experience",
     },
     {
       name: "achievements",
@@ -190,7 +183,13 @@ export const editExpertProfileFormFields = {
       type: "textarea",
       required: false,
       placeholder: "List your achievements, separated by commas",
-    },
+    },{
+      name:"fees_per_session",
+      label: "Fee Per Session",
+      type: "number",
+      required: true,
+      placholder: "What Fees Will you charge"
+    }
   ],
   schema: editExpertProfileSchema,
 };

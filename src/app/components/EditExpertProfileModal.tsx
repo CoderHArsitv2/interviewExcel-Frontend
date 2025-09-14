@@ -25,10 +25,8 @@ interface EditExpertProfileModalProps {
     full_name: string;
     expertise: string; // convert array → comma string
     fees_per_session: number | null;
-    profile_picture_url: string;
-    skills: string; // convert array → comma string
     about_me: string;
-    experience: string;
+    experience: number;
     achievements: string;
     city: string;
     dob: string;
@@ -55,14 +53,11 @@ export default function EditExpertProfileModal({
       full_name: profile.full_name,
       expertise: profile.expertise || "", // convert array → comma string
       fees_per_session: profile.fees_per_session || null,
-      profile_picture_url: profile.profile_picture_url || "",
-      skills: profile.skills || "", // convert array → comma string
-      about_me: "",
-      experience: "",
-      achievements: "",
-      city: "",
-      dob: "",
-      phone: "",
+      experience_years: profile.experience || 0,
+      achievements: profile.achievements || "",
+      city: profile.city || "",
+      dob: profile.dob || "",
+      phone: profile.phone || "",
     },
   });
 
@@ -70,12 +65,16 @@ export default function EditExpertProfileModal({
 
   const onSubmit = async (data: EditExpertProfileFormValues) => {
     try {
-        const formattedDOB = data.dob ? new Date(data.dob).toISOString() : null;
+      const formattedDOB = data.dob ? new Date(data.dob).toISOString() : null;
+      console.log("experienxe years",data.experience_years)
       const res: any = await authenticatedPut("/expert/profile", {
         ...data,
         role: "expert",
         dob: formattedDOB,
-        skills: data.skills?.split(",").map((s) => s.trim()),
+        fees_per_session: data?.fees_per_session
+          ? data.fees_per_session * 100
+          : 0,
+        experience_years: Number(data.experience_years),
       });
 
       toast.success("Profile updated successfully");
@@ -104,36 +103,44 @@ export default function EditExpertProfileModal({
             onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >
-            {formConfig.map((field) => {
-              const error = getError(formState.errors, field.name);
+            <div className="max-h-[70vh] overflow-y-auto px-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                {formConfig.map((field) => {
+                  const error = getError(formState.errors, field.name);
+                  return (
+                    <div key={field.name} className="flex flex-col">
+                      <label className="text-sm font-medium text-gray-700 mb-1">
+                        {field.label}
+                      </label>
+                      <input
+                        type={field.type}
+                        placeholder={field.placeholder || field.label}
+                        {...methods.register(field.name)}
+                        className={`p-2 border rounded-lg text-sm sm:text-base outline-none transition ${
+                          error
+                            ? "border-red-500"
+                            : "border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        }`}
+                      />
+                      {error && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {(error as any).message}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
 
-              return (
-                <div key={field.name} className="flex flex-col">
-                  <input
-                    type={field.type}
-                    placeholder={field.placeholder || field.label}
-                    {...methods.register(field.name)}
-                    className={`p-3 border-2 rounded-lg outline-none transition text-sm sm:text-base ${
-                      error
-                        ? "border-red-500"
-                        : "border-gray-300 focus:ring-2 focus:ring-blue-500"
-                    }`}
-                  />
-                  {error && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {(error as any).message}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-
-            <button
-              type="submit"
-              className="bg-sky-800 text-white p-3 rounded-lg font-semibold hover:bg-sky-900 transition"
-            >
-              Save
-            </button>
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="submit"
+                  className="bg-sky-800 text-white px-5 py-2 rounded-lg font-semibold hover:bg-sky-900 transition"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
           </form>
         </FormProvider>
       </DialogContent>

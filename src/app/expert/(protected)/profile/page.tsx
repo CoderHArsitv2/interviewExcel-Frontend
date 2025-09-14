@@ -35,6 +35,7 @@ interface ExpertProfileResponse {
   city: string;
   dob: string;
   about_me: string;
+  achievements: string;
 }
 
 const ExpertProfilePage = () => {
@@ -45,8 +46,8 @@ const ExpertProfilePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleSave = (updatedProfile: any) => {
-    setExpertProfile(updatedProfile);
+  const handleSave = () => {
+    fetchExpertProfile();
   };
 
   useEffect(() => {
@@ -55,20 +56,21 @@ const ExpertProfilePage = () => {
     }
   }, [user]);
 
+  const fetchExpertProfile = async () => {
+    try {
+      setIsLoading(true);
+      const res: ExpertProfileResponse = await authenticatedGet(
+        "/expert/profile"
+      );
+      setExpertProfile(res);
+    } catch (error) {
+      console.error("Error fetching expert profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchExpertProfile = async () => {
-      try {
-        setIsLoading(true);
-        const res: ExpertProfileResponse = await authenticatedGet(
-          "/expert/profile"
-        );
-        setExpertProfile(res);
-      } catch (error) {
-        console.error("Error fetching expert profile:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchExpertProfile();
   }, []);
 
@@ -92,7 +94,7 @@ const ExpertProfilePage = () => {
           <Card className="flex flex-col items-center gap-4 bg-white rounded-3xl animate-fadeInUp border border-teal-500 shadow-lg shadow-teal-400 p-6 w-full md:w-[30%]">
             <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-teal-700 shadow-lg">
               <Image
-                src={expertProfile.profile_picture_url || `/mascot.png`}
+                src={`/mascot.png`}
                 alt="Expert Avatar"
                 fill
                 className="object-cover"
@@ -109,8 +111,8 @@ const ExpertProfilePage = () => {
             <div className="flex gap-4 mt-6 w-full justify-center">
               <FeatureCard
                 role="expert"
-                title={String(expertProfile.total_sessions || "-")}
-                description="Sessions"
+                title={"₹" + String(expertProfile.fees_per_session / 100 || "-")}
+                description="Fees"
               />
               <FeatureCard
                 role="expert"
@@ -130,6 +132,14 @@ const ExpertProfilePage = () => {
             >
               Edit Profile
             </button>
+
+            {/* NEW Button to manage availability */}
+            <button
+              className="mt-3 px-6 py-2 bg-teal-800 hover:bg-teal-600 text-white rounded-full shadow-md transition"
+              onClick={() => router.push("/expert/sessions")}
+            >
+              Manage Availability
+            </button>
           </Card>
 
           {/* Modal */}
@@ -139,12 +149,10 @@ const ExpertProfilePage = () => {
             profile={{
               full_name: expertProfile.full_name,
               expertise: expertProfile?.expertise || "",
-              fees_per_session: expertProfile?.fees_per_session || null,
-              profile_picture_url: expertProfile.profile_picture_url || "",
-              skills: expertProfile.expertise || "",
+              fees_per_session: expertProfile?.fees_per_session / 100 || null,
               about_me: expertProfile.about_me || "",
-              experience: String(expertProfile.experience_years || ""),
-              achievements: "",
+              experience: expertProfile.experience_years || 0,
+              achievements: expertProfile.achievements || "",
               city: expertProfile.city || "",
               dob: expertProfile.dob || "",
               phone: expertProfile.phone || "",
@@ -166,32 +174,71 @@ const ExpertProfilePage = () => {
                 label="Date Of Birth"
                 value={formatDate(expertProfile?.dob)}
               />
-              <DetailItem label="My City" value={expertProfile?.city || "-"} />
+              <DetailItem label="City" value={expertProfile?.city || "-"} />
+              <DetailItem
+                label="Verification Status"
+                value={expertProfile?.verification_status || "-"}
+              />
+              <DetailItem
+                label="Rating"
+                value={String(expertProfile?.rating || 0)}
+              />
+              <DetailItem
+                label="Total Sessions"
+                value={String(expertProfile?.total_sessions || 0)}
+              />
+              <DetailItem
+                label="Education"
+                value={expertProfile?.education || "-"}
+              />
+            </CardContent>
 
-              {/* About Me */}
-              <div className="col-span-1 md:col-span-2">
-                <p className="text-gray-500 text-sm mb-1">About Me</p>
-                <p className="text-gray-800 font-medium bg-teal-50 border border-teal-200 rounded-xl p-3">
-                  {expertProfile?.about_me || "-"}
-                </p>
-              </div>
-
-              {/* Expertise */}
-              <div className="col-span-1 md:col-span-2">
-                <p className="text-gray-500 text-sm mb-2">Expertise</p>
+            {/* Full-width sections */}
+            <div className="space-y-2 flex justify-between w-full px-6 pr-63">
+              {/* Languages */}
+              <div>
+                <p className="text-gray-500 text-sm mb-2">Languages</p>
                 <div className="flex flex-wrap gap-2">
-                  {expertProfile.expertise ? (
-                    <span className="px-3 py-1 bg-teal-100 text-teal-700 text-sm rounded-full shadow-sm">
-                      {expertProfile.expertise}
-                    </span>
+                  {expertProfile.languages &&
+                  expertProfile.languages.length > 0 ? (
+                    expertProfile.languages.map((lang, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1 bg-teal-100 text-teal-700 text-sm rounded-full shadow-sm"
+                      >
+                        {lang}
+                      </span>
+                    ))
                   ) : (
-                    <span className="px-3 py-1 bg-gray-200 text-gray-600 text-sm rounded-full shadow-sm">
+                    <span className="px-3 py-1 bg-teal-200 text-teal-600 text-sm rounded-full shadow-sm">
                       -
                     </span>
                   )}
                 </div>
               </div>
-            </CardContent>
+
+              {/* Specializations */}
+              <div>
+                <p className="text-gray-500 text-sm mb-2">Specializations</p>
+                <div className="flex flex-wrap gap-2">
+                  {expertProfile.specializations &&
+                  expertProfile.specializations.length > 0 ? (
+                    expertProfile.specializations.map((spec, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1 bg-teal-100 text-teal-700 text-sm rounded-full shadow-sm"
+                      >
+                        {spec}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="px-3 py-1 bg-teal-200 text-teal-600 text-sm rounded-full shadow-sm">
+                      -
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
           </Card>
         </div>
       ) : (

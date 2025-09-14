@@ -18,17 +18,21 @@ export const editExpertProfileSchema = z.object({
       (val) => !isNaN(Date.parse(val)),
       "Date of Birth must be a valid date"
     ),
+  bio: z.string(),
   fees_per_session: z.number().nullable(),
   profile_picture_url: z.string().nullable(),
   about_me: z
     .string()
     .min(10, "About Me must be at least 10 characters")
     .max(500, "About Me must not exceed 500 characters"),
-  skills: z.string().min(2, "Please enter at least one skill"),
+  specializations: z.string().min(2, "Please enter at least one skill"),
+  education: z.string(),
   expertise: z.string().min(2, "Please enter at least one area of expertise"),
-  experience: z.string().max(200, "Experience must not exceed 200 characters"),
+  experience_years: z
+    .number(),
   achievements: z
     .string()
+
     .max(500, "Achievements must not exceed 500 characters"),
 });
 

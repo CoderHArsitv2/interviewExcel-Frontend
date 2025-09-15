@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
+import { WeeklyCalendar } from "@/app/components/Availability";
 
 type Session = {
   id: number;
@@ -21,6 +22,22 @@ type AvailabilitySlot = {
   endTime: string;
   isBooked: boolean;
 };
+const dummySlots: AvailabilitySlot[] = [
+  {
+    id: 1,
+    date: "2025-09-20",
+    startTime: "10:00",
+    endTime: "11:00",
+    isBooked: false,
+  },
+  {
+    id: 2,
+    date: "2025-09-21",
+    startTime: "14:00",
+    endTime: "15:00",
+    isBooked: true,
+  },
+];
 
 const dummySessions: Session[] = [
   {
@@ -39,11 +56,6 @@ const dummySessions: Session[] = [
     endTime: "16:00",
     status: "completed",
   },
-];
-
-const dummySlots: AvailabilitySlot[] = [
-  { id: 1, date: "2025-09-20", startTime: "14:00", endTime: "15:00", isBooked: false },
-  { id: 2, date: "2025-09-21", startTime: "09:00", endTime: "10:00", isBooked: true },
 ];
 
 const ExpertSessionsPage = () => {
@@ -90,14 +102,19 @@ const ExpertSessionsPage = () => {
                     className="p-4 rounded-xl flex justify-between items-center border border-gray-200 shadow-md hover:shadow-lg transition"
                   >
                     <div>
-                      <p className="font-semibold text-lg">{session.studentName}</p>
+                      <p className="font-semibold text-lg">
+                        {session.studentName}
+                      </p>
                       <p className="text-sm text-gray-600">
-                        {format(new Date(session.date), "MMM dd, yyyy")} | {session.startTime} -{" "}
-                        {session.endTime}
+                        {format(new Date(session.date), "MMM dd, yyyy")} |{" "}
+                        {session.startTime} - {session.endTime}
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" className="bg-teal-600 hover:bg-teal-700">
+                      <Button
+                        size="sm"
+                        className="bg-teal-600 hover:bg-teal-700"
+                      >
                         Mark Completed
                       </Button>
                       <Button size="sm" variant="destructive">
@@ -118,51 +135,22 @@ const ExpertSessionsPage = () => {
                     className="p-4 rounded-xl flex justify-between items-center border border-gray-200 shadow-md hover:shadow-lg transition"
                   >
                     <div>
-                      <p className="font-semibold text-lg">{session.studentName}</p>
+                      <p className="font-semibold text-lg">
+                        {session.studentName}
+                      </p>
                       <p className="text-sm text-gray-600">
-                        {format(new Date(session.date), "MMM dd, yyyy")} | {session.startTime} -{" "}
-                        {session.endTime}
+                        {format(new Date(session.date), "MMM dd, yyyy")} |{" "}
+                        {session.startTime} - {session.endTime}
                       </p>
                     </div>
-                    <span className="text-green-600 font-semibold">Completed</span>
+                    <span className="text-green-600 font-semibold">
+                      Completed
+                    </span>
                   </Card>
                 ))}
             </TabsContent>
 
-            {/* Availability Slots */}
-            <TabsContent value="availability" className="mt-4 space-y-4">
-              {dummySlots.map((slot) => (
-                <Card
-                  key={slot.id}
-                  className="p-4 rounded-xl flex justify-between items-center border border-gray-200 shadow-md hover:shadow-lg transition"
-                >
-                  <div>
-                    <p className="font-semibold text-lg">
-                      {format(new Date(slot.date), "MMM dd, yyyy")}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {slot.startTime} - {slot.endTime}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    {slot.isBooked ? (
-                      <span className="text-red-500 font-semibold">Booked</span>
-                    ) : (
-                      <span className="text-green-600 font-semibold">Available</span>
-                    )}
-                    <Button size="sm" variant="outline">
-                      Edit
-                    </Button>
-                    <Button size="sm" variant="destructive">
-                      Delete
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-              <Button className="mt-4 bg-teal-700 hover:bg-teal-600">
-                + Add New Slot
-              </Button>
-            </TabsContent>
+            <WeeklyCalendar slots={dummySlots} />
           </Tabs>
         </CardContent>
       </Card>

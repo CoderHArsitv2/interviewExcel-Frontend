@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { WeeklyCalendar } from "@/app/components/Availability";
+import { useState } from "react";
+import GenerateWeeklySlotsModal from "@/app/components/GenerateSlotModal";
+import { useAuth } from "@/hooks/useAuth";
 
 type Session = {
   id: number;
@@ -59,6 +62,8 @@ const dummySessions: Session[] = [
 ];
 
 const ExpertSessionsPage = () => {
+  const { user } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="w-[90vw] max-w-[1200px] mx-auto mb-10 my-12">
       <Card className="rounded-3xl border border-teal-500 shadow-xl shadow-teal-300/40 p-6">
@@ -69,24 +74,24 @@ const ExpertSessionsPage = () => {
         </CardHeader>
 
         <CardContent>
-          <Tabs defaultValue="upcoming" className="w-full">
+          <Tabs defaultValue="upcoming" className="">
             {/* Tabs Navigation */}
-            <TabsList className="flex w-full justify-around bg-gray-100 rounded-xl p-1 mb-6">
+            <TabsList className="flex w-full  h-15 rounded-xl gap-4 mb-6">
               <TabsTrigger
                 value="upcoming"
-                className="data-[state=active]:bg-teal-600 data-[state=active]:text-white px-6 py-2 rounded-lg text-sm font-medium transition-all hover:bg-teal-100 data-[state=active]:shadow-md"
+                className="data-[state=inactive]:bg-teal-100  data-[state=active]:bg-teal-600 data-[state=active]:text-white px-6 py-2 rounded-lg text-sm font-medium transition-all hover:bg-teal-100 data-[state=active]:shadow-md"
               >
                 Upcoming
               </TabsTrigger>
               <TabsTrigger
                 value="past"
-                className="data-[state=active]:bg-teal-600 data-[state=active]:text-white px-6 py-2 rounded-lg text-sm font-medium transition-all hover:bg-teal-100 data-[state=active]:shadow-md"
+                className="data-[state=inactive]:bg-teal-100 data-[state=active]:bg-teal-600 data-[state=active]:text-white px-6 py-2 rounded-lg text-sm font-medium transition-all hover:bg-teal-100 data-[state=active]:shadow-md"
               >
                 Past
               </TabsTrigger>
               <TabsTrigger
                 value="availability"
-                className="data-[state=active]:bg-teal-600 data-[state=active]:text-white px-6 py-2 rounded-lg text-sm font-medium transition-all hover:bg-teal-100 data-[state=active]:shadow-md"
+                className="data-[state=inactive]:bg-teal-100  data-[state=active]:bg-teal-600 data-[state=active]:text-white px-6 py-2 rounded-lg text-sm font-medium transition-all hover:bg-teal-100 data-[state=active]:shadow-md"
               >
                 Availability
               </TabsTrigger>
@@ -149,11 +154,36 @@ const ExpertSessionsPage = () => {
                   </Card>
                 ))}
             </TabsContent>
+            <TabsContent
+              value="availability"
+              className="flex flex-col justify-center items-center gap-6"
+            >
+              <Button
+                variant="default"
+                size="lg"
+                className="bg-teal-800 cursor-pointer hover:bg-teal-900 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition duration-200"
+                onClick={() => {
+                  setIsOpen(true);
+                }}
+              >
+                + Generate Available Slots
+              </Button>
 
-            <WeeklyCalendar slots={dummySlots} />
+              <WeeklyCalendar slots={dummySlots} />
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
+      <GenerateWeeklySlotsModal
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+        }}
+        expertId={user?.id || 0}
+        onSave={() => {
+          setIsOpen(false);
+        }}
+      />
     </div>
   );
 };

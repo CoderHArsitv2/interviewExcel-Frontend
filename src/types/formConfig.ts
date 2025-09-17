@@ -12,10 +12,15 @@ export interface Fields {
   asyncOptions?: () => Promise<{ label: string; value: string | number }[]>;
   valueAsNumber?: boolean;
   placeholder?: string;
+  options?:Options[]
   disabled?: boolean;
   defaultValue?: string | number | boolean;
 }
 
+export interface Options{
+  label?:string,
+  value?:string
+}
 export const signUpFormFields = {
   fields: [
     {
@@ -125,7 +130,6 @@ export const editProfileFormFields = {
   schema: editProfileSchema,
 };
 
-
 export const editExpertProfileFormFields = {
   fields: [
     {
@@ -183,13 +187,55 @@ export const editExpertProfileFormFields = {
       type: "textarea",
       required: false,
       placeholder: "List your achievements, separated by commas",
-    },{
-      name:"fees_per_session",
+    },
+    {
+      name: "fees_per_session",
       label: "Fee Per Session",
       type: "number",
       required: true,
-      placholder: "What Fees Will you charge"
-    }
+      placholder: "What Fees Will you charge",
+    },
   ],
   schema: editExpertProfileSchema,
+};
+
+export const generateWeeklySlotFormFields = {
+  fields: [
+    {
+      name: "start_time",
+      placeholder: "Time you are free from",
+      label: "Start Time",
+      required: true,
+      type: "time",
+    },
+    {
+      name: "end_time",
+      placeholder: "Time you are free up to",
+      label: "End Time",
+      required: true,
+      type: "time",
+    },
+    {
+      name: "duration",
+      type: "number",
+      label: "Duration (minutes)",
+      placeholder: "e.g. 30",
+      required: true,
+    },
+    {
+      name: "days",
+      type: "checkbox",
+      label: "Select Days",
+      required: true,
+      options: [
+        { value: "monday", label: "Monday" },
+        { value: "tuesday", label: "Tuesday" },
+        { value: "wednesday", label: "Wednesday" },
+        { value: "thursday", label: "Thursday" },
+        { value: "friday", label: "Friday" },
+        { value: "saturday", label: "Saturday" },
+        { value: "sunday", label: "Sunday" },
+      ],
+    },
+  ],
 };

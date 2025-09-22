@@ -19,6 +19,7 @@ export const removeToken = () => {
 interface User {
   id: number;
   name: string;
+  uuid: string;
   email: string;
   role: "student" | "expert";
 }

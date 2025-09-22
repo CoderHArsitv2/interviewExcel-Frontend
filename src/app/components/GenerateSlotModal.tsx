@@ -14,7 +14,7 @@ import { Fields, generateWeeklySlotFormFields } from "@/types/formConfig";
 interface GenerateWeeklySlotsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  expertId: number | null;
+  expertId: string | null;
   onSave: (slots: any[]) => void; // callback after success
 }
 function getError<T extends FieldValues>(

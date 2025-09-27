@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   addDays,
   format,
@@ -8,14 +8,7 @@ import {
   parse,
   isWithinInterval,
 } from "date-fns";
-
-type AvailabilitySlot = {
-  id: number;
-  date: string; // "2025-09-20"
-  startTime: string; // "10:30"
-  endTime: string; // "11:30"
-  isBooked: boolean;
-};
+import { AvailabilitySlot } from "../expert/(protected)/sessions/page";
 
 // ⏰ Half-hour grid instead of full hours
 const times = Array.from({ length: 24 }, (_, i) => {
@@ -24,7 +17,10 @@ const times = Array.from({ length: 24 }, (_, i) => {
   return `${hour.toString().padStart(2, "0")}:${minutes}`;
 });
 
-export const WeeklyCalendar = ({ slots }: { slots: AvailabilitySlot[] }) => {
+interface props {
+  slots: AvailabilitySlot[];
+}
+export const WeeklyCalendar = ({ slots }: props) => {
   const [weekStart, setWeekStart] = useState(
     startOfWeek(new Date(), { weekStartsOn: 1 })
   );
@@ -42,7 +38,8 @@ export const WeeklyCalendar = ({ slots }: { slots: AvailabilitySlot[] }) => {
           ⬅️ Prev
         </button>
         <h2 className="font-bold text-lg">
-          {format(weekStart, "MMM dd")} - {format(addDays(weekStart, 6), "MMM dd")}
+          {format(weekStart, "MMM dd")} -{" "}
+          {format(addDays(weekStart, 6), "MMM dd")}
         </h2>
         <button
           onClick={() => setWeekStart(addDays(weekStart, 7))}
@@ -71,26 +68,20 @@ export const WeeklyCalendar = ({ slots }: { slots: AvailabilitySlot[] }) => {
           </div>
         ))}
 
-        {/* Time Slots */}
-        {times.map((time) => (
-          <>
+        {times.map((time, idx) => (
+          <React.Fragment key={time}>
             {/* Time Column */}
-            <div
-              key={time}
-              className="border-t border-gray-200 p-2 text-sm font-medium bg-gray-50 sticky left-0 z-10"
-            >
+            <div className="border-t border-gray-200 p-2 text-sm font-medium bg-gray-50 sticky left-0 z-10">
               {time}
             </div>
 
             {/* Slots */}
             {days.map((day) => {
-              // Convert grid time into Date
               const cellTime = parse(time, "HH:mm", day);
 
-              // Find slot that overlaps this half-hour block
               const slot = slots.find((s) => {
-                const slotStart = parse(s.startTime, "HH:mm", new Date(s.date));
-                const slotEnd = parse(s.endTime, "HH:mm", new Date(s.date));
+                const slotStart = new Date(s.start_time);
+                const slotEnd = new Date(s.end_time);
                 return (
                   format(new Date(s.date), "yyyy-MM-dd") ===
                     format(day, "yyyy-MM-dd") &&
@@ -100,24 +91,24 @@ export const WeeklyCalendar = ({ slots }: { slots: AvailabilitySlot[] }) => {
 
               return (
                 <div
-                  key={day.toString() + time}
+                  key={`${day.toISOString()}-${time}`}
                   className={`border-t border-l h-12 flex items-center justify-center cursor-pointer transition-all
-                    ${
-                      slot
-                        ? slot.isBooked
-                          ? "bg-red-100 text-red-600 font-medium"
-                          : "bg-green-100 text-green-600 font-medium"
-                        : "hover:bg-gray-100"
-                    }
-                    ${isToday(day) ? "border-blue-300" : ""}
-                  `}
+            ${
+              slot
+                ? slot.is_booked
+                  ? "bg-red-100 text-red-600 font-medium"
+                  : "bg-green-100 text-green-600 font-medium"
+                : "hover:bg-gray-100"
+            }
+            ${isToday(day) ? "border-blue-300" : ""}
+          `}
                   onClick={() => console.log("Clicked", day, time, slot)}
                 >
-                  {slot ? (slot.isBooked ? "Booked" : "Available") : ""}
+                  {slot ? (slot.is_booked ? "Booked" : "Available") : ""}
                 </div>
               );
             })}
-          </>
+          </React.Fragment>
         ))}
       </div>
     </div>

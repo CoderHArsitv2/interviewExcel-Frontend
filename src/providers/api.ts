@@ -1,11 +1,17 @@
-import { getToken, removeToken } from "./authProvider";
+import { getToken } from "./authProvider";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+export interface ApiResponse<T = unknown> {
+  data: T;
+  message?: string;
+  [key: string]: unknown;
+}
 
 async function request<T>(
   method: "GET" | "POST" | "PUT" | "DELETE",
   url: string,
-  body?: any,
+  body?: unknown,
   requireAuth: boolean = false
 ): Promise<T> {
   const headers: HeadersInit = {
@@ -26,11 +32,12 @@ async function request<T>(
   });
 
   let errorMessage = "API request failed";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let errorPayload: any = {};
 
   try {
     errorPayload = await res.clone().json();
-  } catch {}
+  } catch { }
 
   if (!res.ok) {
     switch (res.status) {
@@ -67,15 +74,15 @@ async function request<T>(
 
 // UNAUTHENTICATED
 export const get = <T>(url: string) => request<T>("GET", url);
-export const post = <T>(url: string, body: any) =>
+export const post = <T>(url: string, body: unknown) =>
   request<T>("POST", url, body);
 
 // AUTHENTICATED
 export const authenticatedGet = <T>(url: string) =>
   request<T>("GET", url, undefined, true);
-export const authenticatedPost = <T>(url: string, body: any) =>
+export const authenticatedPost = <T>(url: string, body: unknown) =>
   request<T>("POST", url, body, true);
-export const authenticatedPut = <T>(url: string, body: any) =>
+export const authenticatedPut = <T>(url: string, body: unknown) =>
   request<T>("PUT", url, body, true);
 export const authenticatedDelete = <T>(url: string) =>
   request<T>("DELETE", url, undefined, true);

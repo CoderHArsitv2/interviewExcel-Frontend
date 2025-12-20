@@ -18,7 +18,7 @@ interface RegisterFormProps {
   role: string;
 }
 
-export default function RegisterForm({setMode,role}: RegisterFormProps) {
+export default function RegisterForm({ setMode, role }: RegisterFormProps) {
   const router = useRouter();
 
   const methods = useForm<StudentSignUpFormValues>({
@@ -36,30 +36,33 @@ export default function RegisterForm({setMode,role}: RegisterFormProps) {
 
   const onSubmit = async (data: StudentSignUpFormValues) => {
     try {
-      const res: any = await post("/auth/register", {
+      const res = await post<{ access_token: string }>("/auth/register", {
         ...data,
         role: role,
       });
+      const response = res;
       toast.success("Sign In successful");
       reset();
-      setToken(res.access_token);
+      setToken(response.access_token);
       router.push(`/${role}/profile`);
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Sign Up failed");
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      console.error(error);
+      toast.error(error.message || "Sign Up failed");
     }
   };
 
   const handleGoogleSignUp = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) return;
     try {
-      const res: any = await post("/auth/google/login", {
+      const res = await post<{ access_token: string }>("/auth/google/login", {
         token: credentialResponse.credential,
         role: role,
       });
-      localStorage.setItem("access_token", res.access_token);
+      const response = res;
+      localStorage.setItem("access_token", response.access_token);
       router.push(`/${role}/profile`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       toast.error("Google sign-in failed");
     }
@@ -99,11 +102,10 @@ export default function RegisterForm({setMode,role}: RegisterFormProps) {
                   type={field.type}
                   placeholder={field.placeholder || field.label}
                   {...methods.register(field.name)}
-                  className={`p-3 border rounded-lg outline-none transition text-sm sm:text-base ${
-                    formState.errors[field.name]
-                      ? "border-red-500"
-                      : "border-gray-300 focus:ring-2 focus:ring-blue-500"
-                  }`}
+                  className={`p-3 border rounded-lg outline-none transition text-sm sm:text-base ${formState.errors[field.name]
+                    ? "border-red-500"
+                    : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+                    }`}
                 />
                 {formState.errors[field.name] && (
                   <p className="text-red-500 text-sm mt-1">

@@ -13,7 +13,7 @@ import {
   FieldErrors,
   FieldValues,
 } from "react-hook-form";
-import { authenticatedPut } from "@/providers/api";
+import { authenticatedPut, ApiResponse } from "@/providers/api";
 import toast from "react-hot-toast";
 import { Fields, editExpertProfileFormFields } from "@/types/formConfig";
 import { EditExpertProfileFormValues } from "@/types/schemas/EditExpertProfileSchema";
@@ -32,7 +32,7 @@ interface EditExpertProfileModalProps {
     dob: string;
     phone: string;
   };
-  onSave: (updatedProfile: any) => void;
+  onSave: (updatedProfile: EditExpertProfileFormValues) => void;
 }
 
 function getError<T extends FieldValues>(
@@ -66,8 +66,8 @@ export default function EditExpertProfileModal({
   const onSubmit = async (data: EditExpertProfileFormValues) => {
     try {
       const formattedDOB = data.dob ? new Date(data.dob).toISOString() : null;
-      console.log("experienxe years",data.experience_years)
-      const res: any = await authenticatedPut("/expert/profile", {
+      console.log("experienxe years", data.experience_years)
+      const res = await authenticatedPut<ApiResponse<EditExpertProfileFormValues>>("/expert/profile", {
         ...data,
         role: "expert",
         dob: formattedDOB,
@@ -82,9 +82,10 @@ export default function EditExpertProfileModal({
       reset(res?.data);
       onSave(res?.data);
       onClose();
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Profile update failed");
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      console.error(error);
+      toast.error(error.message || "Profile update failed");
     }
   };
 
@@ -116,15 +117,14 @@ export default function EditExpertProfileModal({
                         type={field.type}
                         placeholder={field.placeholder || field.label}
                         {...methods.register(field.name)}
-                        className={`p-2 border rounded-lg text-sm sm:text-base outline-none transition ${
-                          error
-                            ? "border-red-500"
-                            : "border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                        }`}
+                        className={`p-2 border rounded-lg text-sm sm:text-base outline-none transition ${error
+                          ? "border-red-500"
+                          : "border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          }`}
                       />
                       {error && (
                         <p className="text-red-500 text-xs mt-1">
-                          {(error as any).message}
+                          {(error as { message?: string })?.message}
                         </p>
                       )}
                     </div>

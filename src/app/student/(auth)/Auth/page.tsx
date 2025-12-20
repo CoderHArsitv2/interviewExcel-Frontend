@@ -1,5 +1,5 @@
 "use client";
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import LeftSection from "@/app/components/LeftSection";
 import RegisterForm from "@/app/components/RegisterForm";
 import LoginForm from "@/app/components/LoginForm";
@@ -16,7 +16,7 @@ const SignUpStudent = () => {
     if (user && user.role === "student") {
       router.push("/student/profile");
     }
-  }, [user]);
+  }, [user, router]);
 
   return (
     <div className="flex min-h-screen bg-gray-50">

@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { authenticatedGet } from "@/providers/api";
+import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Match BE response structure
 type Expert = {
@@ -76,68 +78,94 @@ const StudentHomePage = () => {
 
         {/* Experts in Responsive Cards */}
         <div className="space-y-6">
-          {experts.map((expert, idx) => (
-            <motion.div
-              key={expert.id}
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: idx * 0.2 }}
-              className="flex flex-col md:flex-row items-center md:items-start gap-6 border rounded-xl p-6 shadow-md hover:shadow-lg transition bg-white"
-            >
-              {/* Profile Picture */}
-              <img
-                src={expert.profile_picture_url || "/default-avatar.png"}
-                alt={expert.full_name || "Expert"}
-                className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-2 border-blue-500"
-              />
+          {isLoading ? (
+            // Skeleton Loading State
+            Array.from({ length: 3 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="flex flex-col md:flex-row items-center md:items-start gap-6 border rounded-xl p-6 shadow-md bg-white"
+              >
+                <Skeleton className="w-24 h-24 md:w-28 md:h-28 rounded-full" />
+                <div className="flex-1 w-full space-y-3">
+                  <Skeleton className="h-6 w-1/3 mx-auto md:mx-0" />
+                  <Skeleton className="h-4 w-1/4 mx-auto md:mx-0" />
+                  <Skeleton className="h-4 w-full" />
+                  <div className="flex gap-2 justify-center md:justify-start">
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                  </div>
+                  <Skeleton className="h-4 w-1/2 mx-auto md:mx-0" />
+                </div>
+                <Skeleton className="h-10 w-full md:w-32 rounded-lg" />
+              </div>
+            ))
+          ) : (
+            experts.map((expert, idx) => (
+              <motion.div
+                key={expert.id}
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: idx * 0.2 }}
+                className="flex flex-col md:flex-row items-center md:items-start gap-6 border rounded-xl p-6 shadow-md hover:shadow-lg transition bg-white"
+              >
+                {/* Profile Picture */}
+                <Image
+                  src={expert.profile_picture_url || "/default-avatar.png"}
+                  alt={expert.full_name || "Expert"}
+                  width={100}
+                  height={100}
+                  className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-2 border-blue-500"
+                />
 
-              {/* Info Section */}
-              <div className="flex-1 text-center md:text-left">
-                <h2 className="text-lg md:text-xl font-bold">
-                  {expert.full_name || "Unnamed Expert"}
-                </h2>
-                <p className="text-sm text-gray-600">{expert.city || "—"}</p>
-                <p className="mt-2 text-gray-700 text-sm md:text-base">
-                  {expert.about_me || "No bio available."}
-                </p>
+                {/* Info Section */}
+                <div className="flex-1 text-center md:text-left">
+                  <h2 className="text-lg md:text-xl font-bold">
+                    {expert.full_name || "Unnamed Expert"}
+                  </h2>
+                  <p className="text-sm text-gray-600">{expert.city || "—"}</p>
+                  <p className="mt-2 text-gray-700 text-sm md:text-base">
+                    {expert.about_me || "No bio available."}
+                  </p>
 
-                {/* Expertise */}
-                <div className="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
-                  {parseExpertise(expert.expertise).map((skill, i) => (
-                    <span
-                      key={i}
-                      className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs md:text-sm"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+                  {/* Expertise */}
+                  <div className="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
+                    {parseExpertise(expert.expertise).map((skill, i) => (
+                      <span
+                        key={i}
+                        className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs md:text-sm"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Experience */}
+                  <p className="mt-2 text-sm text-gray-700">
+                    <strong>Experience:</strong>{" "}
+                    {expert.experience_years > 0
+                      ? `${expert.experience_years} years`
+                      : "Fresher"}
+                  </p>
+
+                  {/* Fees */}
+                  <p className="mt-1 font-medium text-green-600 text-sm md:text-base">
+                    ₹{expert.fees_per_session || "Free"} / session
+                  </p>
+
+                  {/* Rating */}
+                  <p className="mt-1 text-yellow-500 text-sm">
+                    ⭐ {expert.rating || "No ratings yet"}
+                  </p>
                 </div>
 
-                {/* Experience */}
-                <p className="mt-2 text-sm text-gray-700">
-                  <strong>Experience:</strong>{" "}
-                  {expert.experience_years > 0
-                    ? `${expert.experience_years} years`
-                    : "Fresher"}
-                </p>
-
-                {/* Fees */}
-                <p className="mt-1 font-medium text-green-600 text-sm md:text-base">
-                  ₹{expert.fees_per_session || "Free"} / session
-                </p>
-
-                {/* Rating */}
-                <p className="mt-1 text-yellow-500 text-sm">
-                  ⭐ {expert.rating || "No ratings yet"}
-                </p>
-              </div>
-
-              {/* CTA Button */}
-              <button className="w-full md:w-auto bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2 rounded-lg shadow hover:scale-105 transition">
-                Book Session
-              </button>
-            </motion.div>
-          ))}
+                {/* CTA Button */}
+                <button className="w-full md:w-auto bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2 rounded-lg shadow hover:scale-105 transition">
+                  Book Session
+                </button>
+              </motion.div>
+            ))
+          )}
         </div>
       </div>
 

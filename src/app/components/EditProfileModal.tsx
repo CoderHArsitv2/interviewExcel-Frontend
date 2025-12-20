@@ -13,7 +13,7 @@ import {
   Path,
   useForm,
 } from "react-hook-form";
-import { authenticatedPost, authenticatedPut, post } from "@/providers/api";
+import { authenticatedPut, ApiResponse } from "@/providers/api";
 import toast from "react-hot-toast";
 import { editProfileFormFields, Fields } from "@/types/formConfig";
 import { EditProfileFormValues } from "@/types/schemas/EditProfileSchema";
@@ -31,7 +31,7 @@ interface EditProfileModalProps {
     skills?: string[];
     expertise?: string[];
   };
-  onSave: (updatedProfile: any) => void;
+  onSave: (updatedProfile: EditProfileFormValues) => void;
 }
 
 function getError<T extends FieldValues>(
@@ -65,7 +65,7 @@ export default function EditProfileModal({
     try {
       const formattedDOB = data.dob ? new Date(data.dob).toISOString() : null;
 
-      const res: any = await authenticatedPut("/student/profile", {
+      const res = await authenticatedPut<ApiResponse<EditProfileFormValues>>("/student/profile", {
         ...data,
         role: "student",
         dob: formattedDOB, // better keep consistent key name
@@ -79,9 +79,10 @@ export default function EditProfileModal({
 
       // close modal
       onClose();
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Profile update failed");
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      console.error(error);
+      toast.error(error.message || "Profile update failed");
     }
   };
 
@@ -108,15 +109,14 @@ export default function EditProfileModal({
                     type={field.type}
                     placeholder={field.placeholder || field.label}
                     {...methods.register(field.name)}
-                    className={`p-3 border-2 rounded-lg outline-none transition text-sm sm:text-base ${
-                      error
-                        ? "border-red-500"
-                        : "border-gray-300 focus:ring-2 focus:ring-blue-500"
-                    }`}
+                    className={`p-3 border-2 rounded-lg outline-none transition text-sm sm:text-base ${error
+                      ? "border-red-500"
+                      : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+                      }`}
                   />
                   {error && (
                     <p className="text-red-500 text-sm mt-1">
-                      {(error as any).message}
+                      {(error as { message?: string })?.message}
                     </p>
                   )}
                 </div>

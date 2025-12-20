@@ -5,7 +5,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -34,14 +33,12 @@ export function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className={`${
-        user?.role === "expert" ? "bg-teal-800" : "bg-theme"
-      } text-white`}
+      className={`${user?.role === "expert" ? "bg-teal-800" : "bg-theme"
+        } text-white`}
     >
       <SidebarContent
-        className={`${
-          user?.role === "expert" ? "bg-teal-800" : "bg-theme"
-        }`}
+        className={`${user?.role === "expert" ? "bg-teal-800" : "bg-theme"
+          }`}
       >
         <SidebarGroup>
           <SidebarHeader className="flex items-center gap-2 text-2xl font-bold text-white">
@@ -58,10 +55,9 @@ export function AppSidebar() {
                       <Link
                         href={item.url}
                         className={`flex items-center gap-2 rounded-lg px-3 py-2 transition-colors
-                          ${
-                            isActive
-                              ? "bg-white text-blue-950 font-bold"
-                              : "text-gray-200 hover:bg-white/20"
+                          ${isActive
+                            ? "bg-white text-blue-950 font-bold"
+                            : "text-gray-200 hover:bg-white/20"
                           }`}
                       >
                         <item.icon className="w-5 h-5" />

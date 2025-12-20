@@ -22,7 +22,7 @@ const StudentProfilePage = () => {
     if (user && user.role !== "expert") {
       router.replace(`/${user.role}/profile`);
     }
-  }, [user]);
+  }, [user, router]);
   useEffect(() => {
     const fetchStudentProfile = async () => {
       try {
@@ -107,7 +107,7 @@ const StudentProfilePage = () => {
               about_me: studentProfile?.about_me || "",
               skills: studentProfile?.skills || [],
             }}
-            onSave={(updatedProfile) => {
+            onSave={() => {
               setIsModalOpen(false); // modal closes
             }}
           />

@@ -1,6 +1,6 @@
 "use client"
 import { createContext, useContext, useEffect, useState } from "react";
-import { authenticatedGet, authenticatedPost, get, post } from "./api"; // <--- reusing
+import { authenticatedGet, authenticatedPost } from "./api"; // <--- reusing
 import { RefreshSessionResponse } from "./type";
 import { useRouter } from "next/navigation";
 
@@ -47,12 +47,13 @@ export const AuthProvider = ({
 
   useEffect(() => {
     const token = getToken();
-    console.log("token", token);  
+    console.log("token", token);
     if (token) {
       fetchUserFromToken(token);
-    }else{
+    } else {
       router.push(`/${userRole}/auth`);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const logout = () => {
@@ -100,11 +101,11 @@ export const AuthProvider = ({
 
   const fetchUserFromToken = async (token: string) => {
     try {
-      const data: any = await authenticatedPost("/auth/user", token);
+      const data = await authenticatedPost<{ user: User }>("/auth/user", token);
       setUser(data.user);
       setupAutoRefresh(token);
-    } catch (err) {
-      console.log("Token invalid, trying to refresh...");
+    } catch (err: unknown) {
+      console.log("Token invalid, trying to refresh...", err);
       await refreshSession();
     }
   };

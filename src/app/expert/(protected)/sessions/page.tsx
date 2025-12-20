@@ -31,7 +31,7 @@ export type AvailabilitySlot = {
 const ExpertSessionsPage = () => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [sessions, setSessions] = useState<Session[]>([]);
+  const [sessions] = useState<Session[]>([]);
   const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +44,7 @@ const ExpertSessionsPage = () => {
         setLoading(true);
 
         // ✅ Fetch sessions
-        const sessionsRes: any = await authenticatedGet(`/expert/all-slots`);
+        const sessionsRes = await authenticatedGet<AvailabilitySlot[]>(`/expert/all-slots`);
         setSlots(sessionsRes || []);
       } catch (err) {
         console.error("Error fetching sessions/slots:", err);

@@ -58,17 +58,16 @@ export const WeeklyCalendar = ({ slots }: props) => {
         {days.map((day) => (
           <div
             key={day.toString()}
-            className={`p-2 text-center text-sm font-semibold ${
-              isToday(day)
+            className={`p-2 text-center text-sm font-semibold ${isToday(day)
                 ? "bg-blue-100 text-blue-600 border-b-2 border-blue-500"
                 : "bg-gray-50"
-            }`}
+              }`}
           >
             {format(day, "EEE dd")}
           </div>
         ))}
 
-        {times.map((time, idx) => (
+        {times.map((time) => (
           <React.Fragment key={time}>
             {/* Time Column */}
             <div className="border-t border-gray-200 p-2 text-sm font-medium bg-gray-50 sticky left-0 z-10">
@@ -84,7 +83,7 @@ export const WeeklyCalendar = ({ slots }: props) => {
                 const slotEnd = new Date(s.end_time);
                 return (
                   format(new Date(s.date), "yyyy-MM-dd") ===
-                    format(day, "yyyy-MM-dd") &&
+                  format(day, "yyyy-MM-dd") &&
                   isWithinInterval(cellTime, { start: slotStart, end: slotEnd })
                 );
               });
@@ -93,13 +92,12 @@ export const WeeklyCalendar = ({ slots }: props) => {
                 <div
                   key={`${day.toISOString()}-${time}`}
                   className={`border-t border-l h-12 flex items-center justify-center cursor-pointer transition-all
-            ${
-              slot
-                ? slot.is_booked
-                  ? "bg-red-100 text-red-600 font-medium"
-                  : "bg-green-100 text-green-600 font-medium"
-                : "hover:bg-gray-100"
-            }
+            ${slot
+                      ? slot.is_booked
+                        ? "bg-red-100 text-red-600 font-medium"
+                        : "bg-green-100 text-green-600 font-medium"
+                      : "hover:bg-gray-100"
+                    }
             ${isToday(day) ? "border-blue-300" : ""}
           `}
                   onClick={() => console.log("Clicked", day, time, slot)}

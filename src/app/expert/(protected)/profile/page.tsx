@@ -54,7 +54,7 @@ const ExpertProfilePage = () => {
     if (user && user.role !== "expert") {
       router.replace(`/${user.role}/profile`);
     }
-  }, [user]);
+  }, [user, router]);
 
   const fetchExpertProfile = async () => {
     try {
@@ -200,7 +200,7 @@ const ExpertProfilePage = () => {
                 <p className="text-gray-500 text-sm mb-2">Languages</p>
                 <div className="flex flex-wrap gap-2">
                   {expertProfile.languages &&
-                  expertProfile.languages.length > 0 ? (
+                    expertProfile.languages.length > 0 ? (
                     expertProfile.languages.map((lang, i) => (
                       <span
                         key={i}
@@ -222,7 +222,7 @@ const ExpertProfilePage = () => {
                 <p className="text-gray-500 text-sm mb-2">Specializations</p>
                 <div className="flex flex-wrap gap-2">
                   {expertProfile.specializations &&
-                  expertProfile.specializations.length > 0 ? (
+                    expertProfile.specializations.length > 0 ? (
                     expertProfile.specializations.map((spec, i) => (
                       <span
                         key={i}

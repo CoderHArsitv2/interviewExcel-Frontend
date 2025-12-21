@@ -1,20 +1,59 @@
-import React from 'react';
+"use client";
 
-const partners = ["Logo1", "Logo2", "Logo3", "Logo4", "Logo5"];
+
+
+const partners = [
+    "Google", "Amazon", "Microsoft", "Uber", "Stripe", "Netflix", "Airbnb", "Meta"
+];
 
 export default function PartnersSection() {
     return (
-        <section className="py-16 bg-sky-50">
-            <div className="max-w-6xl mx-auto px-4 text-center">
-                <h2 className="text-3xl font-bold mb-12">Our Trusted Partners</h2>
-                <div className="flex flex-wrap justify-center items-center gap-8">
-                    {partners.map((logo, i) => (
-                        <div key={i} className="w-32 h-16 bg-gray-200 flex items-center justify-center rounded-lg">
-                            {logo}
+        <section className="py-12 bg-white border-b border-gray-100 overflow-hidden">
+            <div className="max-w-7xl mx-auto px-6 mb-8 text-center">
+                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                    Trusted by mentors from top companies
+                </p>
+            </div>
+
+            <div className="relative flex overflow-x-hidden group">
+                <div className="flex animate-marquee whitespace-nowrap">
+                    {[...partners, ...partners, ...partners].map((partner, i) => (
+                        <div key={i} className="mx-8 flex items-center justify-center">
+                            <span className="text-2xl font-bold text-gray-300 hover:text-blue-600 transition-colors cursor-default">
+                                {partner}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="absolute top-0 flex animate-marquee2 whitespace-nowrap">
+                    {[...partners, ...partners, ...partners].map((partner, i) => (
+                        <div key={i} className="mx-8 flex items-center justify-center">
+                            <span className="text-2xl font-bold text-gray-300 hover:text-blue-600 transition-colors cursor-default">
+                                {partner}
+                            </span>
                         </div>
                     ))}
                 </div>
             </div>
+
+            {/* Add custom tailwind animation in globals.css if not present, or use inline styles for marquee */}
+            <style jsx>{`
+        .animate-marquee {
+          animation: marquee 25s linear infinite;
+        }
+        .animate-marquee2 {
+          animation: marquee2 25s linear infinite;
+        }
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-100%); }
+        }
+        @keyframes marquee2 {
+          0% { transform: translateX(100%); }
+          100% { transform: translateX(0%); }
+        }
+      `}</style>
         </section>
     );
 }

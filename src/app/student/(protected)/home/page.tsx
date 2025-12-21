@@ -4,14 +4,19 @@ import { motion } from "framer-motion";
 import { authenticatedGet } from "@/providers/api";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search, Calendar, Star, MapPin, Briefcase, Clock, CheckCircle2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 // Match BE response structure
 type Expert = {
   id: number;
   full_name: string;
-  expertise: string; // comes as "a,b,c"
+  expertise: string;
   fees_per_session: number;
   city: string;
+  user: User;
   experience_years: number;
   dob: string;
   rating: number;
@@ -22,6 +27,17 @@ type Expert = {
   about_me?: string;
   profile_picture_url?: string;
 };
+
+type User = {
+  id: number;
+  user_uuid: string;
+  created_at: string;
+  updated_at: string;
+  full_name: string;
+  email: string;
+  picture: string;
+  role: string;
+}
 
 const StudentHomePage = () => {
   const [experts, setExperts] = useState<Expert[]>([]);
@@ -61,108 +77,127 @@ const StudentHomePage = () => {
   ];
 
   return (
-    <div className="p-4 md:p-8 flex flex-col lg:flex-row gap-6">
+    <div className="p-4 md:p-8 flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
       {/* Left: Experts */}
       <div className="flex-1 space-y-8">
-        {/* Search */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <input
-            type="text"
-            placeholder="🔍 Search experts by name or expertise..."
-            className="flex-1 border px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
-            Search
-          </button>
+        {/* Header & Search */}
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+              Find Your <span className="text-gradient">Expert Mentor</span>
+            </h1>
+            <p className="text-gray-500 mt-2">
+              Connect with industry leaders and boost your career.
+            </p>
+          </div>
+
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+            </div>
+            <Input
+              type="text"
+              placeholder="Search experts by name, skill, or company..."
+              className="pl-10 py-6 text-lg bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl shadow-sm transition-all"
+            />
+          </div>
         </div>
 
-        {/* Experts in Responsive Cards */}
+        {/* Experts List */}
         <div className="space-y-6">
           {isLoading ? (
             // Skeleton Loading State
             Array.from({ length: 3 }).map((_, idx) => (
               <div
                 key={idx}
-                className="flex flex-col md:flex-row items-center md:items-start gap-6 border rounded-xl p-6 shadow-md bg-white"
+                className="glass p-6 rounded-2xl flex flex-col md:flex-row gap-6"
               >
-                <Skeleton className="w-24 h-24 md:w-28 md:h-28 rounded-full" />
-                <div className="flex-1 w-full space-y-3">
-                  <Skeleton className="h-6 w-1/3 mx-auto md:mx-0" />
-                  <Skeleton className="h-4 w-1/4 mx-auto md:mx-0" />
+                <Skeleton className="w-24 h-24 rounded-2xl" />
+                <div className="flex-1 space-y-3">
+                  <Skeleton className="h-6 w-1/3" />
+                  <Skeleton className="h-4 w-1/4" />
                   <Skeleton className="h-4 w-full" />
-                  <div className="flex gap-2 justify-center md:justify-start">
-                    <Skeleton className="h-6 w-16 rounded-full" />
+                  <div className="flex gap-2">
                     <Skeleton className="h-6 w-16 rounded-full" />
                     <Skeleton className="h-6 w-16 rounded-full" />
                   </div>
-                  <Skeleton className="h-4 w-1/2 mx-auto md:mx-0" />
                 </div>
-                <Skeleton className="h-10 w-full md:w-32 rounded-lg" />
               </div>
             ))
           ) : (
             experts.map((expert, idx) => (
               <motion.div
                 key={expert.id}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: idx * 0.2 }}
-                className="flex flex-col md:flex-row items-center md:items-start gap-6 border rounded-xl p-6 shadow-md hover:shadow-lg transition bg-white"
+                transition={{ duration: 0.4, delay: idx * 0.1 }}
+                className="glass p-6 rounded-2xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 border border-white/40 group"
               >
-                {/* Profile Picture */}
-                <Image
-                  src={expert.profile_picture_url || "/default-avatar.png"}
-                  alt={expert.full_name || "Expert"}
-                  width={100}
-                  height={100}
-                  className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-2 border-blue-500"
-                />
-
-                {/* Info Section */}
-                <div className="flex-1 text-center md:text-left">
-                  <h2 className="text-lg md:text-xl font-bold">
-                    {expert.full_name || "Unnamed Expert"}
-                  </h2>
-                  <p className="text-sm text-gray-600">{expert.city || "—"}</p>
-                  <p className="mt-2 text-gray-700 text-sm md:text-base">
-                    {expert.about_me || "No bio available."}
-                  </p>
-
-                  {/* Expertise */}
-                  <div className="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
-                    {parseExpertise(expert.expertise).map((skill, i) => (
-                      <span
-                        key={i}
-                        className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs md:text-sm"
-                      >
-                        {skill}
-                      </span>
-                    ))}
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Profile Picture */}
+                  <div className="relative shrink-0">
+                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden shadow-lg ring-4 ring-white/50">
+                      <Image
+                        src={expert.profile_picture_url || "/default-avatar.png"}
+                        alt={expert.full_name || "Expert"}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="absolute -bottom-3 -right-3 bg-white p-1.5 rounded-full shadow-md">
+                      <div className="bg-green-100 text-green-700 p-1 rounded-full">
+                        <CheckCircle2 className="w-4 h-4" />
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Experience */}
-                  <p className="mt-2 text-sm text-gray-700">
-                    <strong>Experience:</strong>{" "}
-                    {expert.experience_years > 0
-                      ? `${expert.experience_years} years`
-                      : "Fresher"}
-                  </p>
+                  {/* Info Section */}
+                  <div className="flex-1 space-y-3">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+                      <div>
+                        <h2 className="text-xl md:text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                          {expert.user.full_name || "Unnamed Expert"}
+                        </h2>
+                        <div className="flex items-center gap-2 text-gray-500 text-sm mt-1">
+                          <MapPin className="w-4 h-4" />
+                          <span>{expert.city || "Remote"}</span>
+                          <span>•</span>
+                          <Briefcase className="w-4 h-4" />
+                          <span>{expert.experience_years > 0 ? `${expert.experience_years} Yrs Exp` : "Fresher"}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-3 py-1 rounded-full font-medium text-sm">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span>{expert.rating || "New"}</span>
+                      </div>
+                    </div>
 
-                  {/* Fees */}
-                  <p className="mt-1 font-medium text-green-600 text-sm md:text-base">
-                    ₹{expert.fees_per_session || "Free"} / session
-                  </p>
+                    <p className="text-gray-600 text-sm md:text-base line-clamp-2">
+                      {expert.about_me || "Passionate about mentoring and helping students achieve their career goals."}
+                    </p>
 
-                  {/* Rating */}
-                  <p className="mt-1 text-yellow-500 text-sm">
-                    ⭐ {expert.rating || "No ratings yet"}
-                  </p>
+                    {/* Expertise */}
+                    <div className="flex flex-wrap gap-2">
+                      {parseExpertise(expert.expertise).map((skill, i) => (
+                        <Badge key={i} variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-100">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    <div className="pt-4 flex items-center justify-between border-t border-gray-100 mt-4">
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Session Fee</p>
+                        <p className="text-lg font-bold text-green-600">
+                          ₹{expert.fees_per_session || "Free"} <span className="text-sm text-gray-400 font-normal">/ 60 min</span>
+                        </p>
+                      </div>
+                      <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-200 rounded-xl px-6">
+                        Book Now
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-
-                {/* CTA Button */}
-                <button className="w-full md:w-auto bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2 rounded-lg shadow hover:scale-105 transition">
-                  Book Session
-                </button>
               </motion.div>
             ))
           )}
@@ -170,48 +205,78 @@ const StudentHomePage = () => {
       </div>
 
       {/* Right Sidebar */}
-      <div className="lg:w-1/3 space-y-6">
+      <div className="lg:w-80 space-y-6">
         {/* Upcoming Sessions */}
-        <div className="border rounded-lg p-4 shadow-sm bg-white">
-          <h2 className="text-lg font-semibold mb-3">📅 Upcoming Sessions</h2>
+        <div className="glass p-6 rounded-2xl border border-white/40">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <h2 className="font-bold text-gray-900">Upcoming Sessions</h2>
+          </div>
+
           {upcomingSessions.length > 0 ? (
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {upcomingSessions.map((s) => (
                 <li
                   key={s.id}
-                  className="p-3 border rounded-md flex justify-between items-center"
+                  className="p-3 bg-white/50 rounded-xl border border-gray-100 hover:border-blue-200 transition-colors"
                 >
-                  <div>
-                    <p className="font-medium">{s.expert}</p>
-                    <p className="text-sm text-gray-600">{s.date}</p>
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="font-semibold text-sm text-gray-900">{s.expert}</p>
+                    <Badge variant="outline" className="text-[10px] h-5">Confirmed</Badge>
                   </div>
-                  <button className="text-sm bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700">
-                    Join
-                  </button>
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                    <Clock className="w-3 h-3" />
+                    {s.date}
+                  </div>
+                  <Button size="sm" variant="outline" className="w-full h-8 text-xs border-blue-200 text-blue-700 hover:bg-blue-50">
+                    Join Meeting
+                  </Button>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-gray-500">No upcoming sessions</p>
+            <div className="text-center py-8 text-gray-500 text-sm">
+              <Calendar className="w-8 h-8 mx-auto mb-2 opacity-20" />
+              No upcoming sessions
+            </div>
           )}
         </div>
 
         {/* Recommended Experts */}
-        <div className="border rounded-lg p-4 shadow-sm bg-white">
-          <h2 className="text-lg font-semibold mb-3">✨ Recommended Experts</h2>
-          <ul className="space-y-3">
+        <div className="glass p-6 rounded-2xl border border-white/40">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 bg-amber-100 text-amber-600 rounded-lg">
+              <Star className="w-5 h-5" />
+            </div>
+            <h2 className="font-bold text-gray-900">Top Categories</h2>
+          </div>
+          <div className="flex flex-wrap gap-2">
             {recommendedExperts.map((name, i) => (
-              <li
+              <Badge
                 key={i}
-                className="flex justify-between items-center p-2 border rounded-md"
+                variant="outline"
+                className="cursor-pointer hover:bg-gray-50 py-1.5 px-3 text-sm font-normal text-gray-600"
               >
-                <p>{name}</p>
-                <button className="text-sm text-blue-600 hover:underline">
-                  View
-                </button>
-              </li>
+                {name}
+              </Badge>
             ))}
-          </ul>
+          </div>
+        </div>
+
+        {/* Promo Card */}
+        <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500/20 rounded-full -ml-12 -mb-12 blur-xl"></div>
+
+          <h3 className="font-bold text-lg relative z-10">Become an Expert</h3>
+          <p className="text-indigo-100 text-sm mt-2 relative z-10 mb-4">
+            Share your knowledge and earn by mentoring students.
+          </p>
+          <Button variant="secondary" size="sm" className="w-full relative z-10 bg-white text-indigo-600 hover:bg-indigo-50 border-none">
+            Apply Now
+          </Button>
         </div>
       </div>
     </div>

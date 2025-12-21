@@ -1,14 +1,16 @@
 "use client";
 
 import { useAuthContext } from "@/providers/authProvider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { StudentProfileResponse } from "./type";
-import FeatureCard from "@/app/components/FeatureCard";
 import EditProfileModal from "@/app/components/EditProfileModal";
 import { authenticatedGet } from "@/providers/api";
 import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Edit, Mail, Phone, Calendar, MapPin, User, Target } from "lucide-react";
+import { formatDate } from "@/utils/helpers"; 
 
 const StudentProfilePage = () => {
   const { user } = useAuthContext();
@@ -23,6 +25,7 @@ const StudentProfilePage = () => {
       router.replace(`/${user.role}/profile`);
     }
   }, [user, router]);
+
   useEffect(() => {
     const fetchStudentProfile = async () => {
       try {
@@ -40,26 +43,21 @@ const StudentProfilePage = () => {
     fetchStudentProfile();
   }, [isModalOpen]);
 
-  if (!user) {
+  if (!user || isLoading) {
     return (
       <div className="flex h-[80vh] items-center justify-center text-gray-500">
-        Loading profile...
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  console.log("preparing for ", studentProfile?.full_name);
   return (
-    <div className="w-[90vw] max-w-[1200px] mx-1 mb-10 my-12">
-      {isLoading ? (
-        <div className="flex h-[80vh] items-center justify-center text-gray-500">
-          Loading profile...
-        </div>
-      ) : studentProfile !== null ? (
-        <div className="flex flex-col md:flex-row gap-6">
+    <div className="max-w-7xl mx-auto mb-10 my-6 px-4">
+      {studentProfile !== null ? (
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Card: Profile Overview */}
-          <Card className="flex flex-col items-center gap-4 bg-gray-100 rounded-3xl animate-fadeInUp border-theme shadow-blue-400  shadow-lg p-6 w-full md:w-[30%]">
-            <div className="relative w-50 h-50 rounded-full overflow-hidden shadow-xl border-4   border-theme shadow-xl shadow-blue-400">
+          <div className="glass rounded-3xl border border-white/40 p-8 w-full lg:w-[35%] flex flex-col items-center text-center h-fit sticky top-6">
+            <div className="relative w-48 h-48 rounded-full overflow-hidden border-4 border-white shadow-xl mb-6 ring-4 ring-primary/20">
               <Image
                 src={`/profile.jpg`}
                 alt="Student Avatar"
@@ -67,34 +65,35 @@ const StudentProfilePage = () => {
                 className="object-cover"
               />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 text-center">
-              {studentProfile?.full_name || ""}
+
+            <h2 className="text-3xl font-bold text-gray-900 mb-1">
+              {studentProfile?.full_name || "Student"}
             </h2>
-            <span className="text-gray-500 capitalize tracking-wide">
-              {studentProfile?.role || ""}
-            </span>
+            <Badge variant="secondary" className="mb-6 capitalize px-3 py-1 text-sm bg-primary/10 text-primary hover:bg-primary/20 border-primary/20">
+              {studentProfile?.role || "Student"}
+            </Badge>
 
             {/* Stats */}
-            <div className="flex gap-4 mt-6 w-full justify-center">
-              <FeatureCard
-                role="student"
-                title={studentProfile.sessions || "-"}
-                description="Sessions"
-              />
-              <FeatureCard
-                role="student"
-                title={studentProfile.points || "-"}
-                description="Points"
-              />
+            <div className="grid grid-cols-2 gap-4 w-full mb-8">
+              <div className="bg-white/50 p-4 rounded-2xl border border-white/60 shadow-sm">
+                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Sessions</p>
+                <p className="text-2xl font-bold text-primary">{studentProfile.sessions || "-"}</p>
+              </div>
+              <div className="bg-white/50 p-4 rounded-2xl border border-white/60 shadow-sm">
+                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Points</p>
+                <p className="text-2xl font-bold text-primary">{studentProfile.points || "-"}</p>
+              </div>
             </div>
 
-            <button
-              className="mt-6 px-6 py-2 bg-theme hover:bg-blue-900 text-white rounded-full shadow-md transition"
+            <Button
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 rounded-xl py-6"
               onClick={() => setIsModalOpen(true)}
             >
+              <Edit className="w-4 h-4 mr-2" />
               Edit Profile
-            </button>
-          </Card>
+            </Button>
+          </div>
+
           <EditProfileModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
@@ -108,60 +107,51 @@ const StudentProfilePage = () => {
               skills: studentProfile?.skills || [],
             }}
             onSave={() => {
-              setIsModalOpen(false); // modal closes
+              setIsModalOpen(false);
             }}
           />
 
           {/* Right Card: Detailed Info */}
-          <Card className="flex flex-col gap-6 animate-fadeInUp rounded-3xl border-theme bg-gray-100 shadow-lg shadow-blue-400 p-6 w-full md:w-[65%]">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-theme">
-                Student Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <DetailItem label="Email" value={studentProfile?.email || "-"} />
-              <DetailItem label="Phone" value={studentProfile?.phone || "-"} />
-              <DetailItem
-                label="Preparing For"
-                value={studentProfile?.preparing_for || "-"}
-              />
-              <DetailItem
-                label="Date Of Birth"
-                value={studentProfile?.dob || "-"}
-              />
-              <DetailItem label="My City" value={studentProfile?.city || "-"} />
-
-              {/* About Me */}
-              <div className="col-span-1 md:col-span-2">
-                <p className="text-gray-500 text-sm mb-1">About Me</p>
-                <p className="text-gray-800 font-medium bg-blue-200 rounded-xl p-3">
-                  {studentProfile?.about_me || "-"}
-                </p>
+          <div className="glass rounded-3xl border border-white/40 p-8 w-full lg:w-[65%] space-y-8">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                <User className="w-6 h-6" />
               </div>
+              <h3 className="text-2xl font-bold text-gray-900">Student Details</h3>
+            </div>
 
-              {/* Skills */}
-              <div className="col-span-1 md:col-span-2">
-                <p className="text-gray-500 text-sm mb-2">Skills</p>
-                <div className="flex flex-wrap gap-2">
-                  {studentProfile.skills ? (
-                    (studentProfile?.skills).map((skill, i) => (
-                      <span
-                        key={i}
-                        className="px-3 py-1 bg-theme text-white text-sm rounded-full shadow-sm"
-                      >
-                        {skill}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="px-3 py-1 bg-theme text-white text-sm rounded-full shadow-sm">
-                      -
-                    </span>
-                  )}
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
+              <DetailItem icon={<Mail className="w-4 h-4" />} label="Email" value={studentProfile?.email || "-"} />
+              <DetailItem icon={<Phone className="w-4 h-4" />} label="Phone" value={studentProfile?.phone || "-"} />
+              <DetailItem icon={<Target className="w-4 h-4" />} label="Preparing For" value={studentProfile?.preparing_for || "-"} />
+              <DetailItem icon={<Calendar className="w-4 h-4" />} label="Date Of Birth" value={formatDate(studentProfile?.dob)} />
+              <DetailItem icon={<MapPin className="w-4 h-4" />} label="City" value={studentProfile?.city || "-"} />
+            </div>
+
+            {/* About Me */}
+            <div className="border-t border-gray-200/50 pt-8">
+              <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-3">About Me</p>
+              <p className="text-gray-700 leading-relaxed bg-white/50 p-4 rounded-xl border border-white/60">
+                {studentProfile?.about_me || "No bio added yet."}
+              </p>
+            </div>
+
+            {/* Skills */}
+            <div className="border-t border-gray-200/50 pt-8">
+              <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-3">Skills</p>
+              <div className="flex flex-wrap gap-2">
+                {studentProfile.skills && studentProfile.skills.length > 0 ? (
+                  studentProfile.skills.map((skill, i) => (
+                    <Badge key={i} variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-100 px-3 py-1">
+                      {skill}
+                    </Badge>
+                  ))
+                ) : (
+                  <span className="text-gray-400 italic">No skills listed</span>
+                )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="flex h-[80vh] items-center justify-center text-gray-500">
@@ -172,10 +162,13 @@ const StudentProfilePage = () => {
   );
 };
 
-const DetailItem = ({ label, value }: { label: string; value: string }) => (
-  <div>
-    <p className="text-gray-500 text-sm">{label}</p>
-    <p className="text-gray-800 font-medium">{value}</p>
+const DetailItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
+  <div className="flex items-start gap-3">
+    <div className="mt-1 text-gray-400">{icon}</div>
+    <div>
+      <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-0.5">{label}</p>
+      <p className="text-gray-900 font-medium text-lg">{value}</p>
+    </div>
   </div>
 );
 

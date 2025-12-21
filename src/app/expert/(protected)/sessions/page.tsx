@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
@@ -8,7 +7,9 @@ import { WeeklyCalendar } from "@/app/components/Availability";
 import { useState, useEffect } from "react";
 import GenerateWeeklySlotsModal from "@/app/components/GenerateSlotModal";
 import { useAuth } from "@/hooks/useAuth";
-import { authenticatedGet } from "@/providers/api"; // ✅ assumes your wrapper for GET with token
+import { authenticatedGet } from "@/providers/api";
+import { Calendar, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 type Session = {
   id: number;
@@ -57,109 +58,131 @@ const ExpertSessionsPage = () => {
   }, [user?.uuid]);
 
   if (loading) {
-    return <p className="text-center py-10 text-gray-500">Loading...</p>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
   }
+
   return (
-    <div className="w-[90vw] max-w-[1200px] mx-auto mb-10 my-12">
-      <Card className="rounded-3xl border border-teal-500 shadow-xl shadow-teal-300/40 p-6">
-        <CardHeader>
-          <CardTitle className="text-3xl font-extrabold text-teal-700 tracking-tight">
-            Manage Sessions
-          </CardTitle>
-        </CardHeader>
+    <div className="max-w-7xl mx-auto mb-10 my-6 px-4">
+      <div className="glass rounded-3xl border border-white/40 p-6 md:p-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+              Manage <span className="text-primary">Sessions</span>
+            </h1>
+            <p className="text-gray-500 mt-1">
+              View upcoming meetings and manage your availability.
+            </p>
+          </div>
+          <Button
+            size="lg"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg shadow-primary/20"
+            onClick={() => setIsOpen(true)}
+          >
+            + Generate Slots
+          </Button>
+        </div>
 
-        <CardContent>
-          <Tabs defaultValue="upcoming">
-            <TabsList className="flex w-full h-15 rounded-xl gap-4 mb-6">
-              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-              <TabsTrigger value="past">Past</TabsTrigger>
-              <TabsTrigger value="availability">Availability</TabsTrigger>
-            </TabsList>
+        <Tabs defaultValue="upcoming" className="w-full">
+          <TabsList className="grid w-full md:w-[400px] grid-cols-3 bg-secondary/20 p-1 rounded-xl mb-8">
+            <TabsTrigger value="upcoming" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Upcoming</TabsTrigger>
+            <TabsTrigger value="past" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Past</TabsTrigger>
+            <TabsTrigger value="availability" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Availability</TabsTrigger>
+          </TabsList>
 
-            {/* Upcoming Sessions */}
-            <TabsContent value="upcoming" className="mt-4 space-y-4">
-              {sessions.filter((s) => s.status === "upcoming").length === 0 ? (
-                <p className="text-gray-500">No upcoming sessions</p>
-              ) : (
-                sessions
-                  .filter((s) => s.status === "upcoming")
-                  .map((session) => (
-                    <Card
-                      key={session.id}
-                      className="p-4 rounded-xl flex justify-between items-center border shadow-md"
-                    >
+          {/* Upcoming Sessions */}
+          <TabsContent value="upcoming" className="space-y-4">
+            {sessions.filter((s) => s.status === "upcoming").length === 0 ? (
+              <div className="text-center py-12 bg-white/30 rounded-2xl border border-dashed border-gray-300">
+                <Calendar className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                <p className="text-gray-500 font-medium">No upcoming sessions scheduled</p>
+                <p className="text-sm text-gray-400">Generate slots to get booked!</p>
+              </div>
+            ) : (
+              sessions
+                .filter((s) => s.status === "upcoming")
+                .map((session) => (
+                  <div
+                    key={session.id}
+                    className="bg-white/60 backdrop-blur-sm p-5 rounded-xl flex flex-col md:flex-row justify-between items-center border border-white/50 shadow-sm hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-center gap-4 mb-4 md:mb-0">
+                      <div className="bg-blue-100 p-3 rounded-full text-blue-600">
+                        <Calendar className="w-6 h-6" />
+                      </div>
                       <div>
-                        <p className="font-semibold text-lg">
+                        <p className="font-bold text-lg text-gray-900">
                           {session.studentName}
                         </p>
-                        <p className="text-sm text-gray-600">
-                          {format(new Date(session.date), "MMM dd, yyyy")} |{" "}
-                          {session.startTime} - {session.endTime}
-                        </p>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Clock className="w-4 h-4" />
+                          {format(new Date(session.date), "MMM dd, yyyy")} • {session.startTime} - {session.endTime}
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="bg-teal-600 hover:bg-teal-700"
-                        >
-                          Mark Completed
-                        </Button>
-                        <Button size="sm" variant="destructive">
-                          Cancel
-                        </Button>
-                      </div>
-                    </Card>
-                  ))
-              )}
-            </TabsContent>
+                    </div>
+                    <div className="flex gap-3 w-full md:w-auto">
+                      <Button
+                        size="sm"
+                        className="flex-1 md:flex-none bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        Complete
+                      </Button>
+                      <Button size="sm" variant="destructive" className="flex-1 md:flex-none">
+                        <XCircle className="w-4 h-4 mr-2" />
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ))
+            )}
+          </TabsContent>
 
-            {/* Past Sessions */}
-            <TabsContent value="past" className="mt-4 space-y-4">
-              {sessions.filter((s) => s.status === "completed").length === 0 ? (
-                <p className="text-gray-500">No past sessions</p>
-              ) : (
-                sessions
-                  .filter((s) => s.status === "completed")
-                  .map((session) => (
-                    <Card
-                      key={session.id}
-                      className="p-4 rounded-xl flex justify-between items-center border shadow-md"
-                    >
-                      <div>
-                        <p className="font-semibold text-lg">
-                          {session.studentName}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {format(new Date(session.date), "MMM dd, yyyy")} |{" "}
-                          {session.startTime} - {session.endTime}
-                        </p>
-                      </div>
-                      <span className="text-green-600 font-semibold">
-                        Completed
-                      </span>
-                    </Card>
-                  ))
-              )}
-            </TabsContent>
+          {/* Past Sessions */}
+          <TabsContent value="past" className="space-y-4">
+            {sessions.filter((s) => s.status === "completed").length === 0 ? (
+              <div className="text-center py-12 bg-white/30 rounded-2xl border border-dashed border-gray-300">
+                <Clock className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                <p className="text-gray-500 font-medium">No past sessions found</p>
+              </div>
+            ) : (
+              sessions
+                .filter((s) => s.status === "completed")
+                .map((session) => (
+                  <div
+                    key={session.id}
+                    className="bg-gray-50/50 p-5 rounded-xl flex justify-between items-center border border-gray-100"
+                  >
+                    <div>
+                      <p className="font-semibold text-lg text-gray-700">
+                        {session.studentName}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {format(new Date(session.date), "MMM dd, yyyy")} | {session.startTime} - {session.endTime}
+                      </p>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100">
+                      Completed
+                    </Badge>
+                  </div>
+                ))
+            )}
+          </TabsContent>
 
-            {/* Availability */}
-            <TabsContent
-              value="availability"
-              className="flex flex-col justify-center items-center gap-6"
-            >
-              <Button
-                size="lg"
-                className="bg-teal-800 hover:bg-teal-900 text-white font-semibold"
-                onClick={() => setIsOpen(true)}
-              >
-                + Generate Available Slots
-              </Button>
-
+          {/* Availability */}
+          <TabsContent
+            value="availability"
+            className="flex flex-col gap-6"
+          >
+            <div className="bg-white/50 rounded-2xl p-6 border border-white/60 shadow-sm">
               <WeeklyCalendar slots={slots} />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
 
       <GenerateWeeklySlotsModal
         isOpen={isOpen}

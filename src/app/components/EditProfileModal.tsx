@@ -72,8 +72,6 @@ export default function EditProfileModal({
         skills: data.skills?.split(",").map((s) => s.trim()),
       });
 
-      toast.success("Profile updated successfully");
-
       reset(res?.data);
       onSave(res?.data);
 
@@ -82,7 +80,6 @@ export default function EditProfileModal({
     } catch (err: unknown) {
       const error = err as { message?: string };
       console.error(error);
-      toast.error(error.message || "Profile update failed");
     }
   };
 

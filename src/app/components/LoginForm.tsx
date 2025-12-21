@@ -30,14 +30,12 @@ export default function LoginForm({ setMode, role }: LoginFormProps) {
   const onSubmit = async (data: StudentSignInFormValues) => {
     try {
       const res = await post<{ access_token: string }>("/auth/signin", { ...data, role: role });
-      toast.success("Sign In successful");
       reset();
       setToken(res.access_token);
       router.push(`/${role}/profile`);
     } catch (err: unknown) {
       const error = err as { message?: string };
       console.error(error);
-      toast.error(error.message || "Sign In failed");
     }
   };
 
@@ -93,8 +91,8 @@ export default function LoginForm({ setMode, role }: LoginFormProps) {
                     placeholder={field.placeholder || field.label}
                     {...methods.register(field.name)}
                     className={`p-3 border rounded-lg outline-none transition text-sm sm:text-base ${formState.errors[field.name]
-                        ? "border-red-500"
-                        : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+                      ? "border-red-500"
+                      : "border-gray-300 focus:ring-2 focus:ring-blue-500"
                       }`}
                   />
                   {formState.errors[field.name] && (

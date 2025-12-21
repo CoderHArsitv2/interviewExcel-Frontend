@@ -77,15 +77,12 @@ export default function EditExpertProfileModal({
         experience_years: Number(data.experience_years),
       });
 
-      toast.success("Profile updated successfully");
-
       reset(res?.data);
       onSave(res?.data);
       onClose();
     } catch (err: unknown) {
       const error = err as { message?: string };
       console.error(error);
-      toast.error(error.message || "Profile update failed");
     }
   };
 

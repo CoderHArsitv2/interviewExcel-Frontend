@@ -1,4 +1,5 @@
 import { getToken } from "./authProvider";
+import toast from "react-hot-toast";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -40,36 +41,48 @@ async function request<T>(
   } catch { }
 
   if (!res.ok) {
-    switch (res.status) {
-      case 400:
-        errorMessage = errorPayload.error || "Bad Request";
-        break;
-      case 401:
-        errorMessage = "Unauthorized";
-        break;
-      case 403:
-        errorMessage = "Forbidden";
-        break;
-      case 404:
-        errorMessage = "Not Found";
-        break;
-      case 422:
-        errorMessage = errorPayload.error || "Unprocessable Entity";
-        break;
-      case 500:
-        errorMessage = "Internal Server Error";
-        break;
-      case 409:
-        errorMessage = errorPayload.error || "User already exists";
-        break;
-      default:
-        errorMessage = errorPayload.error || `Unexpected Error (${res.status})`;
+    if (errorPayload.error) {
+      errorMessage = errorPayload.error;
+    } else {
+      switch (res.status) {
+        case 400:
+          errorMessage = "Bad Request";
+          break;
+        case 401:
+          errorMessage = "Unauthorized";
+          break;
+        case 403:
+          errorMessage = "Forbidden";
+          break;
+        case 404:
+          errorMessage = "Not Found";
+          break;
+        case 422:
+          errorMessage = "Unprocessable Entity";
+          break;
+        case 500:
+          errorMessage = "Internal Server Error";
+          break;
+        case 409:
+          errorMessage = "User already exists";
+          break;
+        default:
+          errorMessage = `Unexpected Error (${res.status})`;
+      }
     }
 
+    toast.error(errorMessage);
     throw new Error(errorMessage);
   }
 
-  return res.json();
+  const data = await res.json();
+
+  // Show success toast for non-GET requests or if explicitly provided a message
+  if (method !== "GET" || (data as any).message) {
+    toast.success((data as any).message || "Operation successful");
+  }
+
+  return data;
 }
 
 // UNAUTHENTICATED

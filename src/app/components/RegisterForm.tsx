@@ -41,14 +41,12 @@ export default function RegisterForm({ setMode, role }: RegisterFormProps) {
         role: role,
       });
       const response = res;
-      toast.success("Sign In successful");
       reset();
       setToken(response.access_token);
       router.push(`/${role}/profile`);
     } catch (err: unknown) {
       const error = err as { message?: string };
       console.error(error);
-      toast.error(error.message || "Sign Up failed");
     }
   };
 

@@ -1,47 +1,23 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { authenticatedGet } from "@/providers/api";
+import { authenticatedGet, authenticatedPost } from "@/providers/api";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Calendar, Star, MapPin, Briefcase, Clock, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-// Match BE response structure
-type Expert = {
-  id: number;
-  full_name: string;
-  expertise: string;
-  fees_per_session: number;
-  city: string;
-  user: User;
-  experience_years: number;
-  dob: string;
-  rating: number;
-  total_sessions: number;
-  verification_status: string;
-  student_mentored: number;
-  is_available: boolean;
-  about_me?: string;
-  profile_picture_url?: string;
-};
-
-type User = {
-  id: number;
-  user_uuid: string;
-  created_at: string;
-  updated_at: string;
-  full_name: string;
-  email: string;
-  picture: string;
-  role: string;
-}
+import { AvailabilitySlot } from "@/app/expert/(protected)/sessions/page";
+import toast from "react-hot-toast";
+import SlotSelectionModal from "@/app/components/SlotSelectionModal";
 
 const StudentHomePage = () => {
   const [experts, setExperts] = useState<Expert[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null);
 
   const FetchExperts = async () => {
     try {
@@ -75,6 +51,31 @@ const StudentHomePage = () => {
     "UPSC Specialist",
     "Banking Expert",
   ];
+
+  const handleBookNow = async (expert: Expert) => {
+    try {
+      const res: AvailabilitySlot[] = await authenticatedGet(`/student/expert/${expert.user_uuid}/slots`);
+      if (res) {
+        setSlots(res);
+        setSelectedExpert(expert);
+        setIsModalOpen(true);
+      }
+    } catch (err) {
+      toast.error("Error getting slots");
+    }
+  };
+
+  const handleConfirmBooking = async (slotId: number) => {
+    try {
+      const res = await authenticatedPost(`/student/book-slot/${slotId}`,{});  
+      if (res) {
+        toast.success("Session booked successfully!");
+        setIsModalOpen(false);
+      }
+    } catch (error) {
+      toast.error("Booking failed"); // Handled globally
+    }
+  };
 
   return (
     <div className="p-4 md:p-8 flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
@@ -189,10 +190,12 @@ const StudentHomePage = () => {
                       <div>
                         <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Session Fee</p>
                         <p className="text-lg font-bold text-green-600">
-                          ₹{expert.fees_per_session || "Free"} <span className="text-sm text-gray-400 font-normal">/ 60 min</span>
+                          ₹{expert.fees_per_session / 100 || "Free"} <span className="text-sm text-gray-400 font-normal">/ 60 min</span>
                         </p>
                       </div>
-                      <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-200 rounded-xl px-6">
+                      <Button
+                        onClick={() => { handleBookNow(expert) }}
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-200 rounded-xl px-6">
                         Book Now
                       </Button>
                     </div>
@@ -207,60 +210,43 @@ const StudentHomePage = () => {
       {/* Right Sidebar */}
       <div className="lg:w-80 space-y-6">
         {/* Upcoming Sessions */}
-        <div className="glass p-6 rounded-2xl border border-white/40">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
+        <div className="glass rounded-3xl border border-white/40 p-6 shadow-xl">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
               <Calendar className="w-5 h-5" />
             </div>
-            <h2 className="font-bold text-gray-900">Upcoming Sessions</h2>
+            <h2 className="text-xl font-bold text-gray-900">Upcoming Sessions</h2>
           </div>
 
-          {upcomingSessions.length > 0 ? (
-            <ul className="space-y-4">
-              {upcomingSessions.map((s) => (
-                <li
-                  key={s.id}
-                  className="p-3 bg-white/50 rounded-xl border border-gray-100 hover:border-blue-200 transition-colors"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <p className="font-semibold text-sm text-gray-900">{s.expert}</p>
-                    <Badge variant="outline" className="text-[10px] h-5">Confirmed</Badge>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
-                    <Clock className="w-3 h-3" />
-                    {s.date}
-                  </div>
-                  <Button size="sm" variant="outline" className="w-full h-8 text-xs border-blue-200 text-blue-700 hover:bg-blue-50">
-                    Join Meeting
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="text-center py-8 text-gray-500 text-sm">
-              <Calendar className="w-8 h-8 mx-auto mb-2 opacity-20" />
-              No upcoming sessions
+          <div className="space-y-4">
+            {/* Placeholder for upcoming sessions */}
+            <div className="bg-white/50 rounded-xl p-4 border border-white/60 text-center py-8">
+              <p className="text-gray-500 text-sm">No upcoming sessions</p>
+              <Button variant="link" className="text-blue-600 text-sm mt-1">
+                Browse experts
+              </Button>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Recommended Experts */}
-        <div className="glass p-6 rounded-2xl border border-white/40">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 bg-amber-100 text-amber-600 rounded-lg">
+        {/* Recommended Experts (Mini List) */}
+        <div className="glass rounded-3xl border border-white/40 p-6 shadow-xl">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
               <Star className="w-5 h-5" />
             </div>
-            <h2 className="font-bold text-gray-900">Top Categories</h2>
+            <h2 className="text-xl font-bold text-gray-900">Top Rated</h2>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {recommendedExperts.map((name, i) => (
-              <Badge
-                key={i}
-                variant="outline"
-                className="cursor-pointer hover:bg-gray-50 py-1.5 px-3 text-sm font-normal text-gray-600"
-              >
-                {name}
-              </Badge>
+
+          <div className="space-y-4">
+            {["Alice Johnson", "David Smith", "Sarah Wilson"].map((name, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 hover:bg-white/40 rounded-xl transition cursor-pointer">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300" />
+                <div>
+                  <p className="font-bold text-gray-900 text-sm">{name}</p>
+                  <p className="text-xs text-gray-500">Ex-Google, 5 YOE</p>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -279,6 +265,13 @@ const StudentHomePage = () => {
           </Button>
         </div>
       </div>
+      <SlotSelectionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        slots={slots}
+        expertName={selectedExpert?.full_name || "Expert"}
+        onBook={handleConfirmBooking}
+      />
     </div>
   );
 };

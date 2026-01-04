@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { authenticatedGet, authenticatedPost } from "@/providers/api";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import Script from "next/script";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +20,7 @@ const StudentHomePage = () => {
   const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null);
+  const router = useRouter();
 
   const FetchExperts = async () => {
     try {
@@ -64,13 +67,78 @@ const StudentHomePage = () => {
       toast.error("Error getting slots");
     }
   };
+  const openRazorpayCheckout = (
+    data: {
+      order_id: string;
+      amount: number;
+      currency: string;
+      key: string;
+    },
+    slotId: number
+  ) => {
+    const options = {
+      key: data.key,
+      amount: data.amount,
+      currency: data.currency,
+      order_id: data.order_id,
+      name: "InterviewExcel",
+      description: "Expert Session Booking",
+      handler: function (response: any) {
+        verifyPayment(response, slotId);
+      },
+      modal: {
+        ondismiss: function () {
+          toast.error("Payment cancelled");
+        },
+      },
+    };
+
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
+  };
+
+  const verifyPayment = async (
+    response: {
+      razorpay_payment_id: string;
+      razorpay_order_id: string;
+      razorpay_signature: string;
+    },
+    slotId: number
+  ) => {
+    try {
+      const res: any = await authenticatedPost("/student/confirm-booking", {
+        slot_id: slotId,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_signature: response.razorpay_signature,
+      });
+
+      if (res) {
+        toast.success("Payment successful!");
+        router.push(`/student/sessions/${res.session_uuid}`);
+      }
+    } catch (error) {
+      toast.error("Payment verification failed");
+    }
+  };
+
+  interface RazorpayOrder {
+    order_id: string;
+    amount: number;    // in paise
+    currency: string;  // "INR"
+    key: string;       // Razorpay public key
+  }
 
   const handleConfirmBooking = async (slotId: number) => {
     try {
-      const res = await authenticatedPost(`/student/book-slot/${slotId}`,{});  
+      const res: RazorpayOrder = await authenticatedPost(`/student/book-slot/${slotId}`, {
+        slot_id: slotId,
+        amount_in_paise: selectedExpert?.fees_per_session,
+      });
       if (res) {
-        toast.success("Session booked successfully!");
+        toast.success("Initiating payment...");
         setIsModalOpen(false);
+        openRazorpayCheckout(res, slotId);
       }
     } catch (error) {
       toast.error("Booking failed"); // Handled globally
@@ -79,6 +147,7 @@ const StudentHomePage = () => {
 
   return (
     <div className="p-4 md:p-8 flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       {/* Left: Experts */}
       <div className="flex-1 space-y-8">
         {/* Header & Search */}
@@ -139,7 +208,7 @@ const StudentHomePage = () => {
                   <div className="relative shrink-0">
                     <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden shadow-lg ring-4 ring-white/50">
                       <Image
-                        src={expert.profile_picture_url || "/default-avatar.png"}
+                        src={expert.profile_picture_url || "/mascot.png"}
                         alt={expert.full_name || "Expert"}
                         fill
                         className="object-cover"

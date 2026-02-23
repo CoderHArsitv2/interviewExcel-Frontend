@@ -3,7 +3,6 @@ import HeroSection from "./components/HeroSection";
 import Features from "./components/Features";
 import CTASection from "./components/CTASection";
 import TestimonialsSection from "./components/TestimonialsSection";
-import PricingSection from "./components/PricingSection";
 import BlogSection from "./components/BlogSection";
 import PartnersSection from "./components/PartnersSection";
 import FAQSection from "./components/FAQSection";
@@ -22,9 +21,6 @@ export default function HomePage() {
 
       {/* Testimonials Section */}
       <TestimonialsSection />
-
-      {/* Pricing Section */}
-      <PricingSection />
 
       {/* Blog/Articles Section */}
       <BlogSection />

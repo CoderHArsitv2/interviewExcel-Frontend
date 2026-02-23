@@ -77,9 +77,9 @@ async function request<T>(
 
   const data = await res.json();
 
-  // Show success toast for non-GET requests or if explicitly provided a message
-  if (method !== "GET" || (data as any).message) {
-    toast.success((data as any).message || "Operation successful");
+  // Show success toast if explicitly provided a message
+  if ((data as any).message) {
+    toast.success((data as any).message);
   }
 
   return data;

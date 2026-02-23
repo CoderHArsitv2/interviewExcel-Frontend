@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -26,8 +27,13 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
-            I
+          <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-blue-500/20 ring-2 ring-blue-100 bg-white">
+            <Image
+              src="/mascot.png"
+              alt="Interview Excel Mascot"
+              fill
+              className="object-cover p-1"
+            />
           </div>
           <span className="text-xl font-bold text-gray-900 tracking-tight">
             Interview<span className="text-blue-600">Excel</span>
@@ -38,7 +44,6 @@ export default function Navbar() {
         <nav className="hidden md:flex gap-8 text-sm font-medium text-gray-600">
           <Link href="#features" className="hover:text-blue-600 transition-colors">Features</Link>
           <Link href="#testimonials" className="hover:text-blue-600 transition-colors">Testimonials</Link>
-          <Link href="#pricing" className="hover:text-blue-600 transition-colors">Pricing</Link>
           <Link href="#faq" className="hover:text-blue-600 transition-colors">FAQ</Link>
         </nav>
 

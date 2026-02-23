@@ -24,10 +24,10 @@ const SignUpStudent = () => {
       <LeftSection role="expert" />
 
       {/* Right Form */}
-      <div className="relative flex w-full md:w-1/2 items-center flex-col bg-sky-900 md:bg-gray-300 md:justify-center p-8">
+      <div className="relative flex w-full md:w-1/2 items-center flex-col bg-slate-50 md:bg-white md:justify-center p-8">
         {/* Cross Button */}
         <button
-          className="absolute  top-6 md:top-12 right-6 md:right-16 bg-white text-black p-2 rounded-full hover:bg-sky-900 hover:text-white transition"
+          className="absolute top-6 md:top-12 right-6 md:right-16 bg-white border border-slate-200 text-slate-500 hover:text-slate-900 p-2 rounded-full hover:bg-slate-100 transition-all shadow-sm"
           onClick={() => {
             router.push("/");
           }}

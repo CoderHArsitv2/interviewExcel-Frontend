@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Calendar, Clock, Video, FileText, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export type SessionStatus = "upcoming" | "completed" | "cancelled";
+export type SessionStatus = "upcoming" | "completed" | "cancelled" | "scheduled";
 
 export interface SessionData {
     id: string;
@@ -24,7 +24,7 @@ interface SessionCardProps {
 }
 
 export default function SessionCard({ session }: SessionCardProps) {
-    const isUpcoming = session.status === "upcoming";
+    const isUpcoming = session.status === "upcoming" || session.status === "scheduled";
     const isCompleted = session.status === "completed";
     const isCancelled = session.status === "cancelled";
 
@@ -55,8 +55,8 @@ export default function SessionCard({ session }: SessionCardProps) {
 
                 {/* Status Badge */}
                 <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${isUpcoming ? "bg-blue-100 text-blue-700" :
-                        isCompleted ? "bg-green-100 text-green-700" :
-                            "bg-red-100 text-red-700"
+                    isCompleted ? "bg-green-100 text-green-700" :
+                        "bg-red-100 text-red-700"
                     }`}>
                     {isUpcoming && <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -91,7 +91,14 @@ export default function SessionCard({ session }: SessionCardProps) {
             <div className="flex items-center gap-3 pt-2">
                 {isUpcoming && (
                     <>
-                        <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all">
+                        <Button
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all"
+                            onClick={() => {
+                                if (session.joinLink && session.joinLink !== '#') {
+                                    window.open(session.joinLink, '_blank', 'noopener,noreferrer');
+                                }
+                            }}
+                        >
                             <Video className="w-4 h-4 mr-2" />
                             Join Call
                         </Button>

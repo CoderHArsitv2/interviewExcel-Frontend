@@ -110,7 +110,7 @@ const ExpertSessionsPage = () => {
                     className="bg-white/60 backdrop-blur-sm p-5 rounded-xl flex flex-col md:flex-row justify-between items-center border border-white/50 shadow-sm hover:shadow-md transition-all"
                   >
                     <div className="flex items-center gap-4 mb-4 md:mb-0">
-                      <div className="bg-blue-100 p-3 rounded-full text-blue-600">
+                      <div className="bg-amber-100 p-3 rounded-full text-amber-600">
                         <Calendar className="w-6 h-6" />
                       </div>
                       <div>

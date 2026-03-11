@@ -41,6 +41,7 @@ export const AuthProvider = ({
   userRole: "student" | "expert";
 }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [refreshTimer, setRefreshTimer] = useState<NodeJS.Timeout | null>(null);
   const router = useRouter();
   const isAuthenticated = !!user;
@@ -51,6 +52,7 @@ export const AuthProvider = ({
     if (token) {
       fetchUserFromToken(token);
     } else {
+      setLoading(false);
       router.push(`/${userRole}/auth`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -107,12 +109,20 @@ export const AuthProvider = ({
     } catch (err: unknown) {
       console.log("Token invalid, trying to refresh...", err);
       await refreshSession();
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated, setUser, logout }}>
-      {children}
+      {loading ? (
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : isAuthenticated ? (
+        children
+      ) : null}
     </AuthContext.Provider>
   );
 };

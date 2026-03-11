@@ -88,7 +88,7 @@ export default function GenerateWeeklySlotsModal({
                             type="checkbox"
                             value={option.value}
                             {...methods.register(field.name)}
-                            className="w-4 h-4 accent-sky-600"
+                            className="w-4 h-4 accent-amber-600"
                           />
                           <span className="text-sm">{option.label}</span>
                         </label>
@@ -113,7 +113,7 @@ export default function GenerateWeeklySlotsModal({
                     {...methods.register(field.name, { valueAsNumber: field.type === "number" })}
                     className={`p-3 border-2 rounded-lg outline-none transition text-sm sm:text-base ${error
                       ? "border-red-500"
-                      : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+                      : "border-gray-300 focus:ring-2 focus:ring-amber-500"
                       }`}
                   />
                   {error && (
@@ -129,7 +129,7 @@ export default function GenerateWeeklySlotsModal({
             {/* Submit Button */}
             <button
               type="submit"
-              className="bg-sky-800 text-white p-3 rounded-lg font-semibold hover:bg-sky-900 transition"
+              className="bg-amber-600 text-white p-3 rounded-lg font-semibold hover:bg-amber-700 transition"
             >
               Generate Slots
             </button>

@@ -116,7 +116,7 @@ export default function EditExpertProfileModal({
                         {...methods.register(field.name)}
                         className={`p-2 border rounded-lg text-sm sm:text-base outline-none transition ${error
                           ? "border-red-500"
-                          : "border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          : "border-gray-300 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
                           }`}
                       />
                       {error && (
@@ -132,7 +132,7 @@ export default function EditExpertProfileModal({
               <div className="mt-6 flex justify-end">
                 <button
                   type="submit"
-                  className="bg-sky-800 text-white px-5 py-2 rounded-lg font-semibold hover:bg-sky-900 transition"
+                  className="bg-amber-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-amber-700 transition"
                 >
                   Save
                 </button>

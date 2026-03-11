@@ -59,8 +59,8 @@ export const WeeklyCalendar = ({ slots }: props) => {
           <div
             key={day.toString()}
             className={`p-2 text-center text-sm font-semibold ${isToday(day)
-                ? "bg-blue-100 text-blue-600 border-b-2 border-blue-500"
-                : "bg-gray-50"
+              ? "bg-amber-100 text-amber-600 border-b-2 border-amber-500"
+              : "bg-gray-50"
               }`}
           >
             {format(day, "EEE dd")}
@@ -98,7 +98,7 @@ export const WeeklyCalendar = ({ slots }: props) => {
                         : "bg-green-100 text-green-600 font-medium"
                       : "hover:bg-gray-100"
                     }
-            ${isToday(day) ? "border-blue-300" : ""}
+            ${isToday(day) ? "border-amber-300" : ""}
           `}
                   onClick={() => console.log("Clicked", day, time, slot)}
                 >

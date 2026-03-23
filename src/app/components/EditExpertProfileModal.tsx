@@ -14,7 +14,6 @@ import {
   FieldValues,
 } from "react-hook-form";
 import { authenticatedPut, ApiResponse } from "@/providers/api";
-import toast from "react-hot-toast";
 import { Fields, editExpertProfileFormFields } from "@/types/formConfig";
 import { EditExpertProfileFormValues } from "@/types/schemas/EditExpertProfileSchema";
 
@@ -66,7 +65,6 @@ export default function EditExpertProfileModal({
   const onSubmit = async (data: EditExpertProfileFormValues) => {
     try {
       const formattedDOB = data.dob ? new Date(data.dob).toISOString() : null;
-      console.log("experienxe years", data.experience_years)
       const res = await authenticatedPut<ApiResponse<EditExpertProfileFormValues>>("/expert/profile", {
         ...data,
         role: "expert",

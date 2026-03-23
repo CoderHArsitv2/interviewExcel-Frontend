@@ -68,8 +68,8 @@ export default function ExpertHelpPage() {
                         Help & Support
                     </h1>
                     <p className="text-gray-500 text-lg max-w-2xl">
-                        Everything you need to know about mentoring on InterviewExcel. Can't
-                        find what you're looking for? Reach out to our team.
+                        Everything you need to know about mentoring on InterviewExcel. Can&apos;t
+                        find what you&apos;re looking for? Reach out to our team.
                     </p>
                 </div>
 

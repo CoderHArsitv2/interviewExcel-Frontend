@@ -1,5 +1,5 @@
 // Match BE response structure
-type Expert = {
+export type Expert = {
   id: number;
   user_uuid: string;
   full_name: string;
@@ -18,7 +18,7 @@ type Expert = {
   profile_picture_url?: string;
 };
 
-type User = {
+export type User = {
   id: number;
   user_uuid: string;
   created_at: string;
@@ -27,4 +27,4 @@ type User = {
   email: string;
   picture: string;
   role: string;
-}
+};

@@ -8,11 +8,48 @@ import Script from "next/script";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar, Star, MapPin, Briefcase, Clock, CheckCircle2 } from "lucide-react";
+import { Search, Calendar, Star, MapPin, Briefcase, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AvailabilitySlot } from "@/app/expert/(protected)/sessions/page";
 import toast from "react-hot-toast";
 import SlotSelectionModal from "@/app/components/SlotSelectionModal";
+import type { Expert } from "./type";
+
+interface RazorpayCheckoutResponse {
+  order_id: string;
+  amount: number;
+  currency: string;
+  key: string;
+}
+
+interface RazorpaySuccessResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+interface BookingConfirmationResponse {
+  session_uuid: string;
+}
+
+interface RazorpayInstance {
+  open: () => void;
+}
+
+interface RazorpayOptions extends RazorpayCheckoutResponse {
+  name: string;
+  description: string;
+  handler: (response: RazorpaySuccessResponse) => void;
+  modal: {
+    ondismiss: () => void;
+  };
+}
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
 
 const StudentHomePage = () => {
   const [experts, setExperts] = useState<Expert[]>([]);
@@ -44,17 +81,6 @@ const StudentHomePage = () => {
   const parseExpertise = (expertise: string) =>
     expertise ? expertise.split(",").map((e) => e.trim()) : [];
 
-  // hardcoded right panel data
-  const upcomingSessions = [
-    { id: 1, expert: "John Doe", date: "15 Sep, 7:00 PM" },
-    { id: 2, expert: "Jane Smith", date: "18 Sep, 6:30 PM" },
-  ];
-  const recommendedExperts = [
-    "Tech Interview Mentor",
-    "UPSC Specialist",
-    "Banking Expert",
-  ];
-
   const handleBookNow = async (expert: Expert) => {
     try {
       const res: AvailabilitySlot[] = await authenticatedGet(`/student/expert/${expert.user_uuid}/slots`);
@@ -63,27 +89,22 @@ const StudentHomePage = () => {
         setSelectedExpert(expert);
         setIsModalOpen(true);
       }
-    } catch (err) {
+    } catch {
       toast.error("Error getting slots");
     }
   };
   const openRazorpayCheckout = (
-    data: {
-      order_id: string;
-      amount: number;
-      currency: string;
-      key: string;
-    },
+    data: RazorpayCheckoutResponse,
     slotId: number
   ) => {
-    const options = {
+    const options: RazorpayOptions = {
       key: data.key,
       amount: data.amount,
       currency: data.currency,
       order_id: data.order_id,
       name: "InterviewExcel",
       description: "Expert Session Booking",
-      handler: function (response: any) {
+      handler: function (response: RazorpaySuccessResponse) {
         verifyPayment(response, slotId);
       },
       modal: {
@@ -93,7 +114,7 @@ const StudentHomePage = () => {
       },
     };
 
-    const rzp = new (window as any).Razorpay(options);
+    const rzp = new window.Razorpay(options);
     rzp.open();
   };
 
@@ -106,7 +127,7 @@ const StudentHomePage = () => {
     slotId: number
   ) => {
     try {
-      const res: any = await authenticatedPost("/student/confirm-booking", {
+      const res = await authenticatedPost<BookingConfirmationResponse>("/student/confirm-booking", {
         slot_id: slotId,
         razorpay_payment_id: response.razorpay_payment_id,
         razorpay_order_id: response.razorpay_order_id,
@@ -117,21 +138,14 @@ const StudentHomePage = () => {
         toast.success("Payment successful!");
         router.push(`/student/sessions/${res.session_uuid}`);
       }
-    } catch (error) {
+    } catch {
       toast.error("Payment verification failed");
     }
   };
 
-  interface RazorpayOrder {
-    order_id: string;
-    amount: number;    // in paise
-    currency: string;  // "INR"
-    key: string;       // Razorpay public key
-  }
-
   const handleConfirmBooking = async (slotId: number) => {
     try {
-      const res: RazorpayOrder = await authenticatedPost(`/student/book-slot/${slotId}`, {
+      const res = await authenticatedPost<RazorpayCheckoutResponse>(`/student/book-slot/${slotId}`, {
         slot_id: slotId,
         amount_in_paise: selectedExpert?.fees_per_session,
       });
@@ -140,7 +154,7 @@ const StudentHomePage = () => {
         setIsModalOpen(false);
         openRazorpayCheckout(res, slotId);
       }
-    } catch (error) {
+    } catch {
       toast.error("Booking failed"); // Handled globally
     }
   };

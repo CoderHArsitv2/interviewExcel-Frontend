@@ -50,7 +50,6 @@ export default function SlotSelectionModal({
                         <div className="grid grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-2">
                             {slots.map((slot) => {
                                 const startTime = new Date(slot.start_time);
-                                const endTime = new Date(slot.end_time);
                                 const isSelected = selectedSlotId === slot.id;
 
                                 return (

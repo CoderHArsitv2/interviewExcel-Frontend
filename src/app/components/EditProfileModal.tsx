@@ -14,7 +14,6 @@ import {
   useForm,
 } from "react-hook-form";
 import { authenticatedPut, ApiResponse } from "@/providers/api";
-import toast from "react-hot-toast";
 import { editProfileFormFields, Fields } from "@/types/formConfig";
 import { EditProfileFormValues } from "@/types/schemas/EditProfileSchema";
 

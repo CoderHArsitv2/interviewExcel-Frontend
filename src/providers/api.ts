@@ -3,6 +3,14 @@ import toast from "react-hot-toast";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
+interface ErrorPayload {
+  error?: string;
+}
+
+interface MessagePayload {
+  message?: string;
+}
+
 export interface ApiResponse<T = unknown> {
   data: T;
   message?: string;
@@ -33,12 +41,11 @@ async function request<T>(
   });
 
   let errorMessage = "API request failed";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let errorPayload: any = {};
+  let errorPayload: ErrorPayload = {};
 
   try {
-    errorPayload = await res.clone().json();
-  } catch { }
+    errorPayload = (await res.clone().json()) as ErrorPayload;
+  } catch {}
 
   if (!res.ok) {
     if (errorPayload.error) {
@@ -75,11 +82,11 @@ async function request<T>(
     throw new Error(errorMessage);
   }
 
-  const data = await res.json();
+  const data = (await res.json()) as T & MessagePayload;
 
   // Show success toast if explicitly provided a message
-  if ((data as any).message) {
-    toast.success((data as any).message);
+  if (data.message) {
+    toast.success(data.message);
   }
 
   return data;

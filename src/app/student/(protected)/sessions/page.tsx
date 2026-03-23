@@ -6,6 +6,27 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { authenticatedGet } from '@/providers/api';
 import { Loader2 } from 'lucide-react';
 
+interface SessionApiItem {
+  id?: number;
+  session_uuid?: string;
+  expert_name?: string;
+  profile_picture_url?: string;
+  start_time?: string;
+  end_time?: string;
+  status?: string;
+  meet_link?: string;
+}
+
+type SessionsApiResponse = SessionApiItem[] | { data?: SessionApiItem[] };
+
+function normalizeSessionsResponse(response: SessionsApiResponse): SessionApiItem[] {
+  if (Array.isArray(response)) {
+    return response;
+  }
+
+  return Array.isArray(response.data) ? response.data : [];
+}
+
 export default function SessionsPage() {
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
   const [sessions, setSessions] = useState<SessionData[]>([]);
@@ -15,11 +36,11 @@ export default function SessionsPage() {
     const fetchSessions = async () => {
       try {
         setIsLoading(true);
-        const res: any = await authenticatedGet('/student/sessions');
+        const res = await authenticatedGet<SessionsApiResponse>('/student/sessions');
 
-        const sessionsData = Array.isArray(res) ? res : res?.data || [];
+        const sessionsData = normalizeSessionsResponse(res);
 
-        const mappedSessions: SessionData[] = sessionsData.map((s: any): SessionData => {
+        const mappedSessions: SessionData[] = sessionsData.map((s): SessionData => {
           // Format Date and Time
           let dateStr = "Date TBD";
           let timeStr = "Time TBD";

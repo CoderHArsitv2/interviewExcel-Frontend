@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle, Video, Mic, MicOff, MonitorUp, PhoneOff } from "lucide-react";
+import { ArrowRight, CheckCircle, Video, Mic, MonitorUp, PhoneOff } from "lucide-react";
 import Image from "next/image";
 
 export default function HeroSection() {
@@ -178,7 +178,7 @@ export default function HeroSection() {
               </div>
               <div>
                 <p className="text-sm font-bold text-slate-800">Feedback Added</p>
-                <p className="text-xs text-slate-500">"Great technical depth"</p>
+                <p className="text-xs text-slate-500">&ldquo;Great technical depth&rdquo;</p>
               </div>
             </div>
           </motion.div>
@@ -187,4 +187,3 @@ export default function HeroSection() {
     </section>
   );
 }
-

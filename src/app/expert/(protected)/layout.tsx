@@ -20,7 +20,7 @@ export default function ExpertProtectedLayout({
       "/expert/profile": "Profile",
       "/expert/sessions": "Sessions",
       "/expert/help": "Help",
-      "/expert/home": "Home",
+      "/expert/home": "Dashboard",
     };
 
     return mapping[pathname] || "Expert Portal";

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.5](https://github.com/CoderHArsit/interviewExcel-Frontend/compare/v0.1.4...v0.1.5) (2026-03-31)
+
+
+### Features
+
+* **ci:** create GitHub Release after version bump ([58ae66d](https://github.com/CoderHArsit/interviewExcel-Frontend/commit/58ae66d615ca43bfab6f780fc8c6e8ff600c7c03))
+* **ci:** create GitHub Release after version bump ([73df8ae](https://github.com/CoderHArsit/interviewExcel-Frontend/commit/73df8ae3a54217d41417d1645dfa9d703e83bda3))
+
 ## [0.1.4](https://github.com/CoderHArsit/interviewExcel-Frontend/compare/v0.1.3...v0.1.4) (2026-03-31)
 
 

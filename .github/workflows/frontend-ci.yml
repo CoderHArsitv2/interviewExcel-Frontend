@@ -58,6 +58,18 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Clean up stale tags
+        run: |
+          # Get the next version that commit-and-tag-version would create
+          NEXT_VERSION=$(npx commit-and-tag-version --dry-run | grep "tagging release" | sed 's/.*tagging release //')
+          if [ -n "$NEXT_VERSION" ]; then
+            echo "Next version tag: $NEXT_VERSION"
+            # Delete local tag if it exists
+            git tag -d "$NEXT_VERSION" 2>/dev/null || true
+            # Delete remote tag if it exists
+            git push origin --delete "$NEXT_VERSION" 2>/dev/null || true
+          fi
+
       - name: Run release
         run: yarn release
 

@@ -81,7 +81,7 @@ export const AuthProvider = ({
 
       setRefreshTimer(timer);
     } catch (err) {
-      console.error("Token decode failed", err);
+      console.warn("Token decode failed", err);
     }
   };
 
@@ -96,7 +96,7 @@ export const AuthProvider = ({
       setupAutoRefresh(newToken);
       fetchUserFromToken(newToken);
     } catch (err) {
-      console.error("Session refresh failed:", err);
+      console.warn("Session refresh failed:", err);
       logout();
     }
   };

@@ -128,7 +128,7 @@ const ExpertDashboardPage = () => {
                 const res = await authenticatedGet<DashboardResponse>("/expert/dashboard");
                 if (res) setData(res);
             } catch (err) {
-                console.error("Error fetching expert dashboard:", err);
+                console.warn("Error fetching expert dashboard:", err);
             } finally {
                 setLoading(false);
             }
@@ -427,7 +427,7 @@ const ExpertDashboardPage = () => {
                                 Session Fee
                             </span>
                             <span className="text-lg font-bold text-gray-900">
-                                ₹{slot_overview.session_fee}
+                                ₹{slot_overview.session_fee/100}
                             </span>
                         </div>
                     </div>

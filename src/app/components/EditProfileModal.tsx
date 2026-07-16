@@ -78,7 +78,7 @@ export default function EditProfileModal({
       onClose();
     } catch (err: unknown) {
       const error = err as { message?: string };
-      console.error(error);
+      console.warn(error);
     }
   };
 

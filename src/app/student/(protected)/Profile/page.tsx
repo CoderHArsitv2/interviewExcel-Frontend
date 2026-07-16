@@ -35,7 +35,7 @@ const StudentProfilePage = () => {
         );
         setStudentProfile(res);
       } catch (error) {
-        console.error("Error fetching student profile:", error);
+        console.warn("Error fetching student profile:", error);
       } finally {
         setIsLoading(false);
       }

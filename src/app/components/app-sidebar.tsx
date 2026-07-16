@@ -82,8 +82,8 @@ export function AppSidebar() {
                         href={item.url}
                         className={`flex items-center gap-4 rounded-xl px-4 transition-all duration-300 group relative overflow-hidden
                           ${isActive
-                            ? "bg-gradient-to-r from-primary/20 to-primary/5 text-primary-foreground font-semibold shadow-[0_0_20px_rgba(var(--primary),0.3)] border border-primary/20"
-                            : "text-slate-400 hover:bg-white/5 hover:text-white hover:shadow-inner"
+                            ? "bg-gradient-to-r from-primary/20 to-primary/5 text-primary font-semibold shadow-[0_0_20px_rgba(var(--primary),0.3)] border border-primary/20"
+                            : "text-slate-300 hover:bg-white/5 hover:text-white hover:shadow-inner"
                           }`}
                       >
                         {isActive && (

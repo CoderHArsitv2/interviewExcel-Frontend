@@ -37,7 +37,7 @@ export default function LoginForm({ setMode, role }: LoginFormProps) {
       router.push(`/${role}/profile`);
     } catch (err: unknown) {
       const error = err as { message?: string };
-      console.error(error);
+      console.warn(error);
     } finally {
       setIsLoading(false);
     }
@@ -54,8 +54,7 @@ export default function LoginForm({ setMode, role }: LoginFormProps) {
       localStorage.setItem("access_token", res.access_token);
       router.push(`/${role}/profile`);
     } catch (err: unknown) {
-      console.error(err);
-      toast.error("Google sign-in failed");
+      console.warn(err);
     } finally {
       setIsLoading(false);
     }

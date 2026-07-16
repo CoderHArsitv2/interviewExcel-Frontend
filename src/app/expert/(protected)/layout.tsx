@@ -14,6 +14,8 @@ export default function ExpertProtectedLayout({
 }) {
   const pathname = usePathname();
 
+
+  
   // Map pathname → heading
   const pageHeading = useMemo(() => {
     const mapping: Record<string, string> = {

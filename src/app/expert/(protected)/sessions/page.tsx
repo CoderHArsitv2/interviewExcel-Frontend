@@ -48,7 +48,7 @@ const ExpertSessionsPage = () => {
         const sessionsRes = await authenticatedGet<AvailabilitySlot[]>(`/expert/all-slots`);
         setSlots(sessionsRes || []);
       } catch (err) {
-        console.error("Error fetching sessions/slots:", err);
+        console.warn("Error fetching sessions/slots:", err);
       } finally {
         setLoading(false);
       }
@@ -87,7 +87,7 @@ const ExpertSessionsPage = () => {
         </div>
 
         <Tabs defaultValue="upcoming" className="w-full">
-          <TabsList className="grid w-full md:w-[400px] grid-cols-3 bg-secondary/20 p-1 rounded-xl mb-8">
+          <TabsList className="grid w-full md:w-[400px] grid-cols-3 bg-amber-50 p-1 rounded-xl mb-8">
             <TabsTrigger value="upcoming" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Upcoming</TabsTrigger>
             <TabsTrigger value="past" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Past</TabsTrigger>
             <TabsTrigger value="availability" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Availability</TabsTrigger>

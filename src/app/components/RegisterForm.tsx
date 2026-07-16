@@ -48,7 +48,7 @@ export default function RegisterForm({ setMode, role }: RegisterFormProps) {
       router.push(`/${role}/profile`);
     } catch (err: unknown) {
       const error = err as { message?: string };
-      console.error(error);
+      console.warn(error);
     } finally {
       setIsLoading(false);
     }
@@ -66,8 +66,7 @@ export default function RegisterForm({ setMode, role }: RegisterFormProps) {
       localStorage.setItem("access_token", response.access_token);
       router.push(`/${role}/profile`);
     } catch (err: unknown) {
-      console.error(err);
-      toast.error("Google sign-in failed");
+      console.warn(err);
     } finally {
       setIsLoading(false);
     }

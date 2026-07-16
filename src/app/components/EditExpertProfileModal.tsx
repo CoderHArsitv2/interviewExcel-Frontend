@@ -80,7 +80,7 @@ export default function EditExpertProfileModal({
       onClose();
     } catch (err: unknown) {
       const error = err as { message?: string };
-      console.error(error);
+      console.warn(error);
     }
   };
 

@@ -165,6 +165,18 @@
     --sidebar-primary: 43 96% 56%;
     --sidebar-primary-foreground: 26 83% 14%;
     --sidebar-ring: 43 96% 56%;
+
+    /* Tailwind v4 resolves --color-* at :root, so overriding --primary alone
+       does nothing for text-primary/bg-primary utilities. Re-declare the theme
+       tokens in this scope so they re-resolve against the amber values above. */
+    --color-primary: hsl(var(--primary));
+    --color-primary-foreground: hsl(var(--primary-foreground));
+    --color-secondary: hsl(var(--secondary));
+    --color-secondary-foreground: hsl(var(--secondary-foreground));
+    --color-ring: hsl(var(--ring));
+    --color-sidebar-primary: hsl(var(--sidebar-primary));
+    --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+    --color-sidebar-ring: hsl(var(--sidebar-ring));
   }
 
   .expert.dark,
@@ -180,6 +192,14 @@
 
     --sidebar-primary: 43 96% 56%;
     --sidebar-primary-foreground: 26 83% 14%;
+
+    /* Re-resolve theme tokens for dark expert scope (see note above). */
+    --color-primary: hsl(var(--primary));
+    --color-primary-foreground: hsl(var(--primary-foreground));
+    --color-secondary: hsl(var(--secondary));
+    --color-secondary-foreground: hsl(var(--secondary-foreground));
+    --color-sidebar-primary: hsl(var(--sidebar-primary));
+    --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
   }
 
   * {

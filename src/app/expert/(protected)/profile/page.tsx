@@ -64,7 +64,7 @@ const ExpertProfilePage = () => {
       );
       setExpertProfile(res);
     } catch (error) {
-      console.error("Error fetching expert profile:", error);
+      console.warn("Error fetching expert profile:", error);
     } finally {
       setIsLoading(false);
     }
@@ -91,8 +91,8 @@ const ExpertProfilePage = () => {
       ) : expertProfile !== null ? (
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left Card: Profile Overview */}
-          <Card className="flex flex-col items-center gap-4 bg-white rounded-3xl animate-fadeInUp border border-teal-500 shadow-lg shadow-teal-400 p-6 w-full md:w-[30%]">
-            <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-teal-700 shadow-lg">
+          <Card className="glass flex flex-col items-center gap-4 rounded-3xl animate-fadeInUp border border-white/40 shadow-xl p-6 w-full md:w-[30%]">
+            <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-amber-400 shadow-lg shadow-amber-200/50">
               <Image
                 src={`/mascot.png`}
                 alt="Expert Avatar"
@@ -127,7 +127,7 @@ const ExpertProfilePage = () => {
             </div>
 
             <button
-              className="mt-6 px-6 py-2 bg-teal-800 hover:bg-teal-700 text-white rounded-full shadow-md transition"
+              className="mt-6 px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full shadow-lg shadow-primary/20 transition"
               onClick={() => setIsModalOpen(true)}
             >
               Edit Profile
@@ -135,7 +135,7 @@ const ExpertProfilePage = () => {
 
             {/* NEW Button to manage availability */}
             <button
-              className="mt-3 px-6 py-2 bg-teal-800 hover:bg-teal-600 text-white rounded-full shadow-md transition"
+              className="mt-3 px-6 py-2 bg-white/70 hover:bg-white text-amber-700 font-semibold border border-amber-200 rounded-full shadow-md transition"
               onClick={() => router.push("/expert/sessions")}
             >
               Manage Availability
@@ -161,9 +161,9 @@ const ExpertProfilePage = () => {
           />
 
           {/* Right Card: Detailed Info */}
-          <Card className="flex flex-col gap-6 animate-fadeInUp rounded-3xl border border-teal-500 bg-white shadow-lg shadow-teal-400 p-6 w-full md:w-[65%]">
+          <Card className="glass flex flex-col gap-6 animate-fadeInUp rounded-3xl border border-white/40 shadow-xl p-6 w-full md:w-[65%]">
             <CardHeader>
-              <CardTitle className="text-xl font-bold text-teal-600">
+              <CardTitle className="text-xl font-bold text-primary">
                 Expert Details
               </CardTitle>
             </CardHeader>
@@ -204,13 +204,13 @@ const ExpertProfilePage = () => {
                     expertProfile.languages.map((lang, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1 bg-teal-100 text-teal-700 text-sm rounded-full shadow-sm"
+                        className="px-3 py-1 bg-amber-100 text-amber-700 text-sm rounded-full shadow-sm"
                       >
                         {lang}
                       </span>
                     ))
                   ) : (
-                    <span className="px-3 py-1 bg-teal-200 text-teal-600 text-sm rounded-full shadow-sm">
+                    <span className="px-3 py-1 bg-amber-200 text-amber-600 text-sm rounded-full shadow-sm">
                       -
                     </span>
                   )}
@@ -226,13 +226,13 @@ const ExpertProfilePage = () => {
                     expertProfile.specializations.map((spec, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1 bg-teal-100 text-teal-700 text-sm rounded-full shadow-sm"
+                        className="px-3 py-1 bg-amber-100 text-amber-700 text-sm rounded-full shadow-sm"
                       >
                         {spec}
                       </span>
                     ))
                   ) : (
-                    <span className="px-3 py-1 bg-teal-200 text-teal-600 text-sm rounded-full shadow-sm">
+                    <span className="px-3 py-1 bg-amber-200 text-amber-600 text-sm rounded-full shadow-sm">
                       -
                     </span>
                   )}

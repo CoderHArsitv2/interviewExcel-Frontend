@@ -93,7 +93,7 @@ export default function SessionsPage() {
 
         setSessions(mappedSessions);
       } catch (err) {
-        console.error("Failed to fetch sessions:", err);
+        console.warn("Failed to fetch sessions:", err);
       } finally {
         setIsLoading(false);
       }

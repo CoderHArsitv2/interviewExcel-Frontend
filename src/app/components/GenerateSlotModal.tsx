@@ -55,8 +55,7 @@ export default function GenerateWeeklySlotsModal({
       onClose();
     } catch (err: unknown) {
       const error = err as { message?: string };
-      console.error(error);
-      toast.error(error.message || "Failed to generate slots");
+      console.warn(error);
     }
   };
 

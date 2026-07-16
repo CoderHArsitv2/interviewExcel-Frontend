@@ -67,7 +67,7 @@ const StudentHomePage = () => {
         setExperts(res);
       }
     } catch (err) {
-      console.error("Error fetching experts:", err);
+      console.warn("Error fetching experts:", err);
     } finally {
       setIsLoading(false);
     }

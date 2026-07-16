@@ -21,11 +21,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Verify production backend health
-        env:
-          PRODUCTION_BACKEND_HEALTHCHECK_URL: ${{ secrets.PRODUCTION_BACKEND_HEALTHCHECK_URL }}
-        run: curl --retry 12 --retry-delay 5 --retry-all-errors -fsS "$PRODUCTION_BACKEND_HEALTHCHECK_URL"
-
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 

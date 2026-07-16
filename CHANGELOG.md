@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.7](https://github.com/CoderHArsitv2/interviewExcel-Frontend/compare/v0.1.6...v0.1.7) (2026-07-16)
+
+
+### Bug Fixes
+
+* fixed the workflow ([e386d4f](https://github.com/CoderHArsitv2/interviewExcel-Frontend/commit/e386d4fa8d108a9a9177989c17a6d3b2a73c9ed2))
+* fixed the workflow ([49742aa](https://github.com/CoderHArsitv2/interviewExcel-Frontend/commit/49742aa4e1e645e62ce07c737e6836916bc9f1ec))
+
 ## 0.1.6 (2026-07-16)
 
 

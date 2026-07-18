@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.8](https://github.com/CoderHArsitv2/interviewExcel-Frontend/compare/v0.1.7...v0.1.8) (2026-07-18)
+
+
+### Bug Fixes
+
+* fixed the staging deployment backend variables ([a02b202](https://github.com/CoderHArsitv2/interviewExcel-Frontend/commit/a02b20229d70596a380423635123be8bc73cad8e))
+* fixed the staging deployment backend variables ([ae04026](https://github.com/CoderHArsitv2/interviewExcel-Frontend/commit/ae040265286984a85d35c802d329d2f6142e8583))
+
 ## [0.1.7](https://github.com/CoderHArsitv2/interviewExcel-Frontend/compare/v0.1.6...v0.1.7) (2026-07-16)
 
 

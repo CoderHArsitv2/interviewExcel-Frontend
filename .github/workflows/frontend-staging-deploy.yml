@@ -59,3 +59,13 @@ jobs:
           deployment_url="$(vercel deploy --prebuilt --yes --token="$VERCEL_TOKEN" | tail -n 1)"
           echo "deployment_url=$deployment_url" >> "$GITHUB_OUTPUT"
 
+      - name: Alias staging deployment to custom domain
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel alias set "${{ steps.deploy.outputs.deployment_url }}" staging.interviewexcel.in --token="$VERCEL_TOKEN"
+
+      - name: Smoke test staging URL
+        run: curl --retry 12 --retry-delay 5 --retry-all-errors -fsS "https://staging.interviewexcel.in"
+

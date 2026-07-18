@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+# Per-environment files are committed and copied to .env.local in CI before build
+!.env.staging
+!.env.production
 
 # vercel
 .vercel

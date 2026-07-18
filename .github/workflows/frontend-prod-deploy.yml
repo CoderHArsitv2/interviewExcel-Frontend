@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Prepare production environment
+        run: cp .env.production .env.local
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 

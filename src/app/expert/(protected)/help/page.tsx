@@ -17,7 +17,7 @@ const faqs = [
     {
         question: "How do I create available slots for students?",
         answer:
-            "Navigate to the 'Sessions' page and click 'Generate Slots'. You can select the days, start/end times, and duration for each slot. Once generated, these slots will be visible to students for booking.",
+            "Navigate  to the 'Sessions' page and click 'Generate Slots'. You can select the days, start/end times, and duration for each slot. Once generated, these slots will be visible to students for booking.",
     },
     {
         question: "How do I get paid for my sessions?",

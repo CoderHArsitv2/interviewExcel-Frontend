@@ -21,7 +21,7 @@ const StudentProfilePage = () => {
 
   const router = useRouter();
   useEffect(() => {
-    if (user && user.role !== "expert") {
+    if (user && user.role !== "student") {
       router.replace(`/${user.role}/profile`);
     }
   }, [user, router]);

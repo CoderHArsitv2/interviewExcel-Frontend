@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.11](https://github.com/CoderHArsitv2/interviewExcel-Frontend/compare/v0.1.10...v0.1.11) (2026-07-21)
+
+
+### Bug Fixes
+
+* fixed the routing of student/profile page and fixed the not foun… ([16f5a5e](https://github.com/CoderHArsitv2/interviewExcel-Frontend/commit/16f5a5ed2e517823385d1908e318e07da7cf18a9))
+* fixed the routing of student/profile page and fixed the not found page ([4648bb0](https://github.com/CoderHArsitv2/interviewExcel-Frontend/commit/4648bb03f38f8e0da31eed83d3979b5f12e19d6f))
+
 ## [0.1.10](https://github.com/CoderHArsitv2/interviewExcel-Frontend/compare/v0.1.9...v0.1.10) (2026-07-18)
 
 

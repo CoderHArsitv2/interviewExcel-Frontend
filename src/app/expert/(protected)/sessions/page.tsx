@@ -20,13 +20,15 @@ type Session = {
   status: "upcoming" | "completed" | "cancelled";
 };
 
+export type SlotStatus = "AVAILABLE" | "BOOKED";
+
 export type AvailabilitySlot = {
   id: number;
   expert_id: string;
   date: string;
   start_time: string;
   end_time: string;
-  is_booked: false;
+  status: SlotStatus;
 };
 
 const ExpertSessionsPage = () => {
@@ -56,6 +58,14 @@ const ExpertSessionsPage = () => {
 
     fetchData();
   }, [user?.uuid]);
+
+  // Booked slots are the expert's upcoming sessions.
+  const bookedSlots = slots
+    .filter((s) => s.status === "BOOKED")
+    .sort(
+      (a, b) =>
+        new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+    );
 
   if (loading) {
     return (
@@ -95,49 +105,47 @@ const ExpertSessionsPage = () => {
 
           {/* Upcoming Sessions */}
           <TabsContent value="upcoming" className="space-y-4">
-            {sessions.filter((s) => s.status === "upcoming").length === 0 ? (
+            {bookedSlots.length === 0 ? (
               <div className="text-center py-12 bg-white/30 rounded-2xl border border-dashed border-gray-300">
                 <Calendar className="w-12 h-12 mx-auto text-gray-300 mb-3" />
                 <p className="text-gray-500 font-medium">No upcoming sessions scheduled</p>
                 <p className="text-sm text-gray-400">Generate slots to get booked!</p>
               </div>
             ) : (
-              sessions
-                .filter((s) => s.status === "upcoming")
-                .map((session) => (
-                  <div
-                    key={session.id}
-                    className="bg-white/60 backdrop-blur-sm p-5 rounded-xl flex flex-col md:flex-row justify-between items-center border border-white/50 shadow-sm hover:shadow-md transition-all"
-                  >
-                    <div className="flex items-center gap-4 mb-4 md:mb-0">
-                      <div className="bg-amber-100 p-3 rounded-full text-amber-600">
-                        <Calendar className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-lg text-gray-900">
-                          {session.studentName}
-                        </p>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Clock className="w-4 h-4" />
-                          {format(new Date(session.date), "MMM dd, yyyy")} • {session.startTime} - {session.endTime}
-                        </div>
-                      </div>
+              bookedSlots.map((slot) => (
+                <div
+                  key={slot.id}
+                  className="bg-white/60 backdrop-blur-sm p-5 rounded-xl flex flex-col md:flex-row justify-between items-center border border-white/50 shadow-sm hover:shadow-md transition-all"
+                >
+                  <div className="flex items-center gap-4 mb-4 md:mb-0">
+                    <div className="bg-amber-100 p-3 rounded-full text-amber-600">
+                      <Calendar className="w-6 h-6" />
                     </div>
-                    <div className="flex gap-3 w-full md:w-auto">
-                      <Button
-                        size="sm"
-                        className="flex-1 md:flex-none bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        <CheckCircle2 className="w-4 h-4 mr-2" />
-                        Complete
-                      </Button>
-                      <Button size="sm" variant="destructive" className="flex-1 md:flex-none">
-                        <XCircle className="w-4 h-4 mr-2" />
-                        Cancel
-                      </Button>
+                    <div>
+                      <p className="font-bold text-lg text-gray-900">
+                        Booked Session
+                      </p>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Clock className="w-4 h-4" />
+                        {format(new Date(slot.start_time), "MMM dd, yyyy")} • {format(new Date(slot.start_time), "h:mm a")} - {format(new Date(slot.end_time), "h:mm a")}
+                      </div>
                     </div>
                   </div>
-                ))
+                  <div className="flex gap-3 w-full md:w-auto">
+                    <Button
+                      size="sm"
+                      className="flex-1 md:flex-none bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Complete
+                    </Button>
+                    <Button size="sm" variant="destructive" className="flex-1 md:flex-none">
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ))
             )}
           </TabsContent>
 

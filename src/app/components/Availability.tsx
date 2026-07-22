@@ -88,12 +88,14 @@ export const WeeklyCalendar = ({ slots }: props) => {
                 );
               });
 
+              const isBooked = slot?.status === "BOOKED";
+
               return (
                 <div
                   key={`${day.toISOString()}-${time}`}
                   className={`border-t border-l h-12 flex items-center justify-center cursor-pointer transition-all
             ${slot
-                      ? slot.is_booked
+                      ? isBooked
                         ? "bg-red-100 text-red-600 font-medium"
                         : "bg-green-100 text-green-600 font-medium"
                       : "hover:bg-gray-100"
@@ -102,7 +104,7 @@ export const WeeklyCalendar = ({ slots }: props) => {
           `}
                   onClick={() => console.log("Clicked", day, time, slot)}
                 >
-                  {slot ? (slot.is_booked ? "Booked" : "Available") : ""}
+                  {slot ? (isBooked ? "Booked" : "Available") : ""}
                 </div>
               );
             })}

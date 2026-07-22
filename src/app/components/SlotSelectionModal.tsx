@@ -24,6 +24,9 @@ export default function SlotSelectionModal({
 }: SlotSelectionModalProps) {
     const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
 
+    // Only available slots can be booked; booked ones must not be offered.
+    const availableSlots = slots.filter((slot) => slot.status === "AVAILABLE");
+
     const handleBook = () => {
         if (selectedSlotId) {
             onBook(selectedSlotId);
@@ -41,14 +44,14 @@ export default function SlotSelectionModal({
                 </div>
 
                 <div className="p-6">
-                    {slots.length === 0 ? (
+                    {availableSlots.length === 0 ? (
                         <div className="text-center py-8 text-gray-500">
                             <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                             <p>No available slots found for this expert.</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-2">
-                            {slots.map((slot) => {
+                            {availableSlots.map((slot) => {
                                 const startTime = new Date(slot.start_time);
                                 const isSelected = selectedSlotId === slot.id;
 

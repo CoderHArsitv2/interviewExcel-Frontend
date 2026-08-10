@@ -8,6 +8,7 @@ import { authenticatedGet } from "@/providers/api";
 import { formatDate } from "@/utils/helpers";
 import FeatureCard from "@/app/components/FeatureCard";
 import EditExpertProfileModal from "@/app/components/EditExpertProfileModal";
+import ProfileImageUpload from "@/app/components/ProfileImageUpload";
 import { useRouter } from "next/navigation";
 
 // Types
@@ -90,8 +91,10 @@ const ExpertProfilePage = () => {
         </div>
       ) : expertProfile !== null ? (
         <div className="flex flex-col md:flex-row gap-6">
+          {/* Left Column */}
+          <div className="w-full md:w-[30%] flex flex-col gap-6">
           {/* Left Card: Profile Overview */}
-          <Card className="glass flex flex-col items-center gap-4 rounded-3xl animate-fadeInUp border border-white/40 shadow-xl p-6 w-full md:w-[30%]">
+          <Card className="glass flex flex-col items-center gap-4 rounded-3xl animate-fadeInUp border border-white/40 shadow-xl p-6">
             <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-amber-400 shadow-lg shadow-amber-200/50">
               <Image
                 src={`/mascot.png`}
@@ -141,6 +144,15 @@ const ExpertProfilePage = () => {
               Manage Availability
             </button>
           </Card>
+
+          {/* Upload Profile Photo */}
+          <ProfileImageUpload
+            uploadUrl="/expert/profile/picture"
+            currentImageUrl={expertProfile?.profile_picture_url || expertProfile?.picture}
+            fallbackName={expertProfile?.full_name || user?.full_name || "Expert"}
+            onUploaded={handleSave}
+          />
+          </div>
 
           {/* Modal */}
           <EditExpertProfileModal

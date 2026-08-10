@@ -25,6 +25,9 @@ export function AppSidebar() {
 
   const basePath = user?.role === "expert" ? "/expert" : "/student";
 
+  const displayName = user?.full_name || user?.name || "User";
+  const displayEmail = user?.email || "";
+
   const items = [
     { title: "Home", url: `${basePath}/home`, icon: LayoutDashboard },
     { title: "Profile", url: `${basePath}/profile`, icon: User },
@@ -106,16 +109,18 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <div className={`flex items-center gap-3 p-2 rounded-2xl bg-white/5 border border-white/5 ${state === "collapsed" ? "justify-center" : ""}`}>
               <Avatar className="h-10 w-10 rounded-lg border-2 border-white/10 shadow-sm">
-                <AvatarImage src={"/mascot.png"} alt={user?.name} />
+                <AvatarImage src={"/mascot.png"} alt={displayName} />
                 <AvatarFallback className="rounded-lg bg-primary/20 text-primary font-bold">
-                  {user?.name?.charAt(0) || "U"}
+                  {displayName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
 
               {state === "expanded" && (
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm text-white truncate">{user?.name || "User"}</p>
-                  <p className="text-xs text-slate-400 truncate">{user?.email || "user@example.com"}</p>
+                  <p className="font-semibold text-sm text-white truncate">{displayName}</p>
+                  {displayEmail && (
+                    <p className="text-xs text-slate-400 truncate">{displayEmail}</p>
+                  )}
                 </div>
               )}
 

@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { authenticatedGet, authenticatedPost } from "./api"; // <--- reusing
 import { RefreshSessionResponse } from "./type";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export const setToken = (token: string) => {
   localStorage.setItem("access_token", token);
@@ -18,7 +19,8 @@ export const removeToken = () => {
 
 interface User {
   id: number;
-  name: string;
+  name?: string;
+  full_name?: string;
   uuid: string;
   email: string;
   role: "student" | "expert";
@@ -48,7 +50,6 @@ export const AuthProvider = ({
 
   useEffect(() => {
     const token = getToken();
-    console.log("token", token);
     if (token) {
       fetchUserFromToken(token);
     } else {
@@ -88,7 +89,8 @@ export const AuthProvider = ({
   const refreshSession = async () => {
     try {
       const res: RefreshSessionResponse = await authenticatedGet(
-        `/auth/refresh`
+        `/auth/refresh`,
+        true
       );
       const newToken = res.access_token;
 
@@ -97,13 +99,18 @@ export const AuthProvider = ({
       fetchUserFromToken(newToken);
     } catch (err) {
       console.warn("Session refresh failed:", err);
+      toast.error("Your session has expired. Please sign in again.");
       logout();
     }
   };
 
   const fetchUserFromToken = async (token: string) => {
     try {
-      const data = await authenticatedPost<{ user: User }>("/auth/user", token);
+      const data = await authenticatedPost<{ user: User }>(
+        "/auth/user",
+        token,
+        true
+      );
       setUser(data.user);
       setupAutoRefresh(token);
     } catch (err: unknown) {

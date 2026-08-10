@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { authenticatedGet, authenticatedPost } from "@/providers/api";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Script from "next/script";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,6 +80,22 @@ const StudentHomePage = () => {
   const parseExpertise = (expertise: string) =>
     expertise ? expertise.split(",").map((e) => e.trim()) : [];
 
+  // Load Razorpay's checkout script on demand (it eagerly prefetches many
+  // chunks once loaded, so we avoid pulling it in until checkout is initiated).
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (typeof window !== "undefined" && window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handleBookNow = async (expert: Expert) => {
     try {
       const res: AvailabilitySlot[] = await authenticatedGet(`/student/expert/${expert.user_uuid}/slots`);
@@ -152,6 +167,11 @@ const StudentHomePage = () => {
       if (res) {
         toast.success("Initiating payment...");
         setIsModalOpen(false);
+        const loaded = await loadRazorpayScript();
+        if (!loaded) {
+          toast.error("Failed to load payment gateway. Please try again.");
+          return;
+        }
         openRazorpayCheckout(res, slotId);
       }
     } catch {
@@ -161,7 +181,6 @@ const StudentHomePage = () => {
 
   return (
     <div className="p-4 md:p-8 flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       {/* Left: Experts */}
       <div className="flex-1 space-y-8">
         {/* Header & Search */}

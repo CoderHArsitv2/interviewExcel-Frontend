@@ -5,6 +5,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { StudentProfileResponse } from "./type";
 import EditProfileModal from "@/app/components/EditProfileModal";
+import ProfileImageUpload from "@/app/components/ProfileImageUpload";
 import { authenticatedGet } from "@/providers/api";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ const StudentProfilePage = () => {
     useState<StudentProfileResponse | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const router = useRouter();
   useEffect(() => {
@@ -41,7 +43,7 @@ const StudentProfilePage = () => {
       }
     };
     fetchStudentProfile();
-  }, [isModalOpen]);
+  }, [isModalOpen, reloadKey]);
 
   if (!user || isLoading) {
     return (
@@ -55,8 +57,10 @@ const StudentProfilePage = () => {
     <div className="max-w-7xl mx-auto mb-10 my-6 px-4">
       {studentProfile !== null ? (
         <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Column */}
+          <div className="w-full lg:w-[35%] flex flex-col gap-6 h-fit lg:sticky lg:top-6">
           {/* Left Card: Profile Overview */}
-          <div className="glass rounded-3xl border border-white/40 p-8 w-full lg:w-[35%] flex flex-col items-center text-center h-fit sticky top-6">
+          <div className="glass rounded-3xl border border-white/40 p-8 flex flex-col items-center text-center">
             <div className="relative w-48 h-48 rounded-full overflow-hidden border-4 border-white shadow-xl mb-6 ring-4 ring-primary/20">
               <Image
                 src={`/profile.jpg`}
@@ -92,6 +96,14 @@ const StudentProfilePage = () => {
               <Edit className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>
+          </div>
+
+          {/* Upload Profile Photo */}
+          <ProfileImageUpload
+            uploadUrl="/student/profile/picture"
+            fallbackName={studentProfile?.full_name || user?.full_name || "Student"}
+            onUploaded={() => setReloadKey((k) => k + 1)}
+          />
           </div>
 
           <EditProfileModal

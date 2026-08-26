@@ -8,6 +8,7 @@ import {
   parse,
   isWithinInterval,
 } from "date-fns";
+import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { AvailabilitySlot } from "../expert/(protected)/sessions/page";
 
 // ⏰ Half-hour grid instead of full hours
@@ -27,89 +28,157 @@ export const WeeklyCalendar = ({ slots }: props) => {
 
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
+  const availableCount = slots.filter(
+    (s) => s.status?.toLowerCase() === "available"
+  ).length;
+  const bookedCount = slots.filter(
+    (s) => s.status?.toLowerCase() === "booked"
+  ).length;
+
   return (
-    <div className="w-full overflow-x-auto">
-      {/* Week navigation */}
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => setWeekStart(addDays(weekStart, -7))}
-          className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-sm"
-        >
-          ⬅️ Prev
-        </button>
-        <h2 className="font-bold text-lg">
-          {format(weekStart, "MMM dd")} -{" "}
-          {format(addDays(weekStart, 6), "MMM dd")}
-        </h2>
-        <button
-          onClick={() => setWeekStart(addDays(weekStart, 7))}
-          className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-sm"
-        >
-          Next ➡️
-        </button>
+    <div className="w-full">
+      {/* Toolbar */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center h-11 w-11 rounded-2xl bg-gradient-to-br from-primary/20 to-amber-200/40 text-primary shadow-sm">
+            <CalendarDays className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="font-bold text-lg text-gray-900 leading-tight">
+              {format(weekStart, "MMM dd")} –{" "}
+              {format(addDays(weekStart, 6), "MMM dd, yyyy")}
+            </h2>
+            <p className="text-xs text-gray-500">Weekly availability overview</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() =>
+              setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))
+            }
+            className="px-4 h-9 rounded-full text-sm font-medium bg-white/70 border border-gray-200 text-gray-700 hover:bg-white hover:shadow-sm transition-all"
+          >
+            Today
+          </button>
+          <button
+            onClick={() => setWeekStart(addDays(weekStart, -7))}
+            aria-label="Previous week"
+            className="h-9 w-9 flex items-center justify-center rounded-full bg-white/70 border border-gray-200 text-gray-600 hover:bg-white hover:text-primary hover:shadow-sm transition-all"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setWeekStart(addDays(weekStart, 7))}
+            aria-label="Next week"
+            className="h-9 w-9 flex items-center justify-center rounded-full bg-white/70 border border-gray-200 text-gray-600 hover:bg-white hover:text-primary hover:shadow-sm transition-all"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-wrap items-center gap-4 mb-4 text-xs font-medium text-gray-500">
+        <span className="flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500" />
+          Available <span className="text-gray-400">({availableCount})</span>
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded-full bg-gradient-to-br from-rose-400 to-rose-500" />
+          Booked <span className="text-gray-400">({bookedCount})</span>
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded-full bg-gray-100 border border-gray-200" />
+          Free
+        </span>
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-8 border border-gray-300 rounded-lg shadow-sm min-w-[900px]">
-        {/* Header Row */}
-        <div className="bg-gray-50 p-2 text-sm font-semibold sticky left-0 z-10">
-          Time
-        </div>
-        {days.map((day) => (
-          <div
-            key={day.toString()}
-            className={`p-2 text-center text-sm font-semibold ${isToday(day)
-              ? "bg-amber-100 text-amber-600 border-b-2 border-amber-500"
-              : "bg-gray-50"
-              }`}
-          >
-            {format(day, "EEE dd")}
+      <div className="w-full overflow-x-auto rounded-2xl border border-gray-200/80 shadow-sm bg-white/70">
+        <div className="grid grid-cols-8 min-w-[900px]">
+          {/* Header Row */}
+          <div className="bg-gray-50/80 backdrop-blur-sm p-3 text-xs font-semibold text-gray-400 uppercase tracking-wider sticky left-0 z-20 border-b border-gray-200">
+            Time
           </div>
-        ))}
-
-        {times.map((time) => (
-          <React.Fragment key={time}>
-            {/* Time Column */}
-            <div className="border-t border-gray-200 p-2 text-sm font-medium bg-gray-50 sticky left-0 z-10">
-              {time}
+          {days.map((day) => (
+            <div
+              key={day.toString()}
+              className={`p-3 text-center border-b border-gray-200 ${
+                isToday(day)
+                  ? "bg-gradient-to-b from-amber-50 to-white"
+                  : "bg-gray-50/80"
+              }`}
+            >
+              <p
+                className={`text-[11px] uppercase tracking-wide ${
+                  isToday(day) ? "text-amber-600 font-bold" : "text-gray-400"
+                }`}
+              >
+                {format(day, "EEE")}
+              </p>
+              <p
+                className={`text-sm font-semibold ${
+                  isToday(day) ? "text-amber-700" : "text-gray-700"
+                }`}
+              >
+                {format(day, "dd")}
+              </p>
             </div>
+          ))}
 
-            {/* Slots */}
-            {days.map((day) => {
-              const cellTime = parse(time, "HH:mm", day);
+          {times.map((time, rowIdx) => (
+            <React.Fragment key={time}>
+              {/* Time Column */}
+              <div className="border-t border-gray-100 px-3 py-2 text-xs font-medium text-gray-500 bg-gray-50/80 backdrop-blur-sm sticky left-0 z-10 flex items-center">
+                {time}
+              </div>
 
-              const slot = slots.find((s) => {
-                const slotStart = new Date(s.start_time);
-                const slotEnd = new Date(s.end_time);
+              {/* Slots */}
+              {days.map((day) => {
+                const cellTime = parse(time, "HH:mm", day);
+
+                const slot = slots.find((s) => {
+                  const slotStart = new Date(s.start_time);
+                  const slotEnd = new Date(s.end_time);
+                  return (
+                    format(new Date(s.date), "yyyy-MM-dd") ===
+                      format(day, "yyyy-MM-dd") &&
+                    isWithinInterval(cellTime, {
+                      start: slotStart,
+                      end: slotEnd,
+                    })
+                  );
+                });
+
+                const isBooked = slot?.status?.toLowerCase() === "booked";
+
                 return (
-                  format(new Date(s.date), "yyyy-MM-dd") ===
-                  format(day, "yyyy-MM-dd") &&
-                  isWithinInterval(cellTime, { start: slotStart, end: slotEnd })
+                  <div
+                    key={`${day.toISOString()}-${time}`}
+                    className={`border-t border-l border-gray-100 h-11 flex items-center justify-center transition-all
+                      ${
+                        slot
+                          ? isBooked
+                            ? "bg-gradient-to-br from-rose-50 to-rose-100 text-rose-600"
+                            : "bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-700 hover:from-emerald-100 hover:to-emerald-200 cursor-pointer"
+                          : `${rowIdx % 2 === 0 ? "bg-white/40" : "bg-gray-50/30"} hover:bg-amber-50/60 cursor-pointer`
+                      }
+                      ${isToday(day) ? "border-l-amber-200" : ""}
+                    `}
+                    onClick={() => console.log("Clicked", day, time, slot)}
+                  >
+                    {slot && (
+                      <span className="text-[11px] font-semibold tracking-wide">
+                        {isBooked ? "Booked" : "Open"}
+                      </span>
+                    )}
+                  </div>
                 );
-              });
-
-              const isBooked = slot?.status === "BOOKED";
-
-              return (
-                <div
-                  key={`${day.toISOString()}-${time}`}
-                  className={`border-t border-l h-12 flex items-center justify-center cursor-pointer transition-all
-            ${slot
-                      ? isBooked
-                        ? "bg-red-100 text-red-600 font-medium"
-                        : "bg-green-100 text-green-600 font-medium"
-                      : "hover:bg-gray-100"
-                    }
-            ${isToday(day) ? "border-amber-300" : ""}
-          `}
-                  onClick={() => console.log("Clicked", day, time, slot)}
-                >
-                  {slot ? (isBooked ? "Booked" : "Available") : ""}
-                </div>
-              );
-            })}
-          </React.Fragment>
-        ))}
+              })}
+            </React.Fragment>
+          ))}
+        </div>
       </div>
     </div>
   );

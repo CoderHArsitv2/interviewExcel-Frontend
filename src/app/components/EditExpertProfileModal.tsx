@@ -30,6 +30,7 @@ interface EditExpertProfileModalProps {
     city: string;
     dob: string;
     phone: string;
+    profile_picture_key?: string | null;
   };
   onSave: (updatedProfile: EditExpertProfileFormValues) => void;
 }
@@ -57,6 +58,8 @@ export default function EditExpertProfileModal({
       city: profile.city || "",
       dob: profile.dob || "",
       phone: profile.phone || "",
+      // Round-tripped untouched so saving the form preserves the photo.
+      profile_picture_key: profile.profile_picture_key || null,
     },
   });
 

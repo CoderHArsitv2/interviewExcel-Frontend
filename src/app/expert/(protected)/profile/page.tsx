@@ -2,9 +2,12 @@
 
 import { useAuthContext } from "@/providers/authProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Image from "next/image";
-import React, { useEffect, useState } from "react";
-import { authenticatedGet } from "@/providers/api";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  authenticatedGet,
+  authenticatedPut,
+  UploadImageResponse,
+} from "@/providers/api";
 import { formatDate } from "@/utils/helpers";
 import FeatureCard from "@/app/components/FeatureCard";
 import EditExpertProfileModal from "@/app/components/EditExpertProfileModal";
@@ -26,6 +29,7 @@ interface ExpertProfileResponse {
   expertise: string;
   education: string;
   experience_years: number;
+  profile_picture_key: string;
   profile_picture_url: string;
   fees_per_session: number;
   rating: number;
@@ -47,8 +51,50 @@ const ExpertProfilePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Presigned URLs expire (24h TTL), so a page left open can end up with a dead
+  // src. Re-fetch once per URL to pick up a fresh signature without looping on
+  // an image that is genuinely broken.
+  const erroredAvatarUrl = useRef<string | null>(null);
+
+  const handleAvatarError = (
+    e: React.SyntheticEvent<HTMLImageElement, Event>
+  ) => {
+    const failedSrc = e.currentTarget.currentSrc || e.currentTarget.src;
+    if (!expertProfile?.profile_picture_url) return;
+    if (erroredAvatarUrl.current === failedSrc) return;
+    erroredAvatarUrl.current = failedSrc;
+    fetchExpertProfile();
+  };
+
   const handleSave = () => {
     fetchExpertProfile();
+  };
+
+  /**
+   * Persist the uploaded object key on the profile. We send back the profile's
+   * current values alongside it so this stays correct whether the endpoint
+   * treats the body as a patch or as a full replacement. Only `file_key` is
+   * stored — the presigned `file_url` is ephemeral and must never be sent as
+   * the key.
+   */
+  const handlePhotoUploaded = async (result: UploadImageResponse) => {
+    if (!expertProfile) return;
+    await authenticatedPut("/expert/profile", {
+      full_name: expertProfile.full_name,
+      phone: expertProfile.phone || "",
+      city: expertProfile.city || "",
+      dob: expertProfile.dob || null,
+      expertise: expertProfile.expertise || "",
+      education: expertProfile.education || "",
+      about_me: expertProfile.about_me || "",
+      achievements: expertProfile.achievements || "",
+      // Already in paise as returned by GET — do not re-scale.
+      fees_per_session: expertProfile.fees_per_session || 0,
+      experience_years: expertProfile.experience_years || 0,
+      role: "expert",
+      profile_picture_key: result.file_key,
+    });
+    await fetchExpertProfile();
   };
 
   useEffect(() => {
@@ -96,11 +142,16 @@ const ExpertProfilePage = () => {
           {/* Left Card: Profile Overview */}
           <Card className="glass flex flex-col items-center gap-4 rounded-3xl animate-fadeInUp border border-white/40 shadow-xl p-6">
             <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-amber-400 shadow-lg shadow-amber-200/50">
-              <Image
-                src={`/mascot.png`}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={
+                  expertProfile?.profile_picture_url ||
+                  expertProfile?.picture ||
+                  "/mascot.png"
+                }
                 alt="Expert Avatar"
-                fill
-                className="object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
+                onError={handleAvatarError}
               />
             </div>
             <h2 className="text-2xl font-bold text-gray-800 text-center">
@@ -147,10 +198,12 @@ const ExpertProfilePage = () => {
 
           {/* Upload Profile Photo */}
           <ProfileImageUpload
-            uploadUrl="/expert/profile/picture"
-            currentImageUrl={expertProfile?.profile_picture_url || expertProfile?.picture}
+            uploadUrl="/upload/image"
+            currentImageUrl={expertProfile?.profile_picture_url}
+            fallbackImageUrl={expertProfile?.picture}
             fallbackName={expertProfile?.full_name || user?.full_name || "Expert"}
-            onUploaded={handleSave}
+            onUploaded={handlePhotoUploaded}
+            onImageError={fetchExpertProfile}
           />
           </div>
 
@@ -168,6 +221,7 @@ const ExpertProfilePage = () => {
               city: expertProfile.city || "",
               dob: expertProfile.dob || "",
               phone: expertProfile.phone || "",
+              profile_picture_key: expertProfile.profile_picture_key || null,
             }}
             onSave={handleSave}
           />

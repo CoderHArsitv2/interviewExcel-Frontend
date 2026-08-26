@@ -2,8 +2,9 @@
 
 import React from "react";
 import Image from "next/image";
-import { Calendar, Clock, Video, FileText, CheckCircle, XCircle } from "lucide-react";
+import { Calendar, Clock, Video, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import StatusPill from "@/app/components/StatusPill";
 
 export type SessionStatus = "upcoming" | "completed" | "cancelled" | "scheduled";
 
@@ -54,19 +55,7 @@ export default function SessionCard({ session }: SessionCardProps) {
                 </div>
 
                 {/* Status Badge */}
-                <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${isUpcoming ? "bg-blue-100 text-blue-700" :
-                    isCompleted ? "bg-green-100 text-green-700" :
-                        "bg-red-100 text-red-700"
-                    }`}>
-                    {isUpcoming && <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                    </span>}
-                    {isCompleted && <CheckCircle className="w-3.5 h-3.5" />}
-                    {isCancelled && <XCircle className="w-3.5 h-3.5" />}
-
-                    {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
-                </div>
+                <StatusPill status={session.status} />
             </div>
 
             <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-100 to-transparent mb-5" />

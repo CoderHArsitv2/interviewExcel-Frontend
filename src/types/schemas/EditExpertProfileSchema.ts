@@ -20,7 +20,9 @@ export const editExpertProfileSchema = z.object({
     ),
   bio: z.string(),
   fees_per_session: z.number().nullable(),
-  profile_picture_url: z.string().nullable(),
+  // The durable object key, not the presigned URL — carried through edits so
+  // a profile save never drops the photo.
+  profile_picture_key: z.string().nullable().optional(),
   about_me: z
     .string()
     .min(10, "About Me must be at least 10 characters")

@@ -6,15 +6,19 @@ import TestimonialsSection from "./components/TestimonialsSection";
 import BlogSection from "./components/BlogSection";
 import PartnersSection from "./components/PartnersSection";
 import FAQSection from "./components/FAQSection";
+import Footer from "./components/Footer";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-300">
       {/* Top Navbar */}
       <Navbar />
 
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Partners Marquee */}
+      <PartnersSection />
 
       {/* Features Section */}
       <Features />
@@ -25,14 +29,14 @@ export default function HomePage() {
       {/* Blog/Articles Section */}
       <BlogSection />
 
-      {/* Partners Section */}
-      <PartnersSection />
-
       {/* FAQ Section */}
       <FAQSection />
 
       {/* Call To Action */}
       <CTASection />
+
+      {/* Footer */}
+      <Footer />
     </main>
   );
 }

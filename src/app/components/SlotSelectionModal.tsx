@@ -25,7 +25,9 @@ export default function SlotSelectionModal({
     const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
 
     // Only available slots can be booked; booked ones must not be offered.
-    const availableSlots = slots.filter((slot) => slot.status === "AVAILABLE");
+    const availableSlots = slots.filter(
+        (slot) => slot.status?.toLowerCase() === "available"
+    );
 
     const handleBook = () => {
         if (selectedSlotId) {

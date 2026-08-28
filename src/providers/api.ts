@@ -95,6 +95,20 @@ async function request<T>(
   return data;
 }
 
+/**
+ * Shape returned by `POST /upload/image`.
+ *
+ * `file_key` is the durable object key — this is what gets persisted on the
+ * profile (as `profile_picture_key`). `file_url` is a *presigned* URL that
+ * expires (24h server-side), so it is only safe to use for an instant preview;
+ * never cache it or send it back as the key.
+ */
+export interface UploadImageResponse {
+  file_key: string;
+  file_url?: string;
+  message?: string;
+}
+
 // MULTIPART FILE UPLOAD
 // The JSON `request` helper can't be reused here: it forces
 // `Content-Type: application/json` and JSON.stringifies the body, whereas a
@@ -102,7 +116,7 @@ async function request<T>(
 export async function uploadFile<T>(
   url: string,
   file: File,
-  fieldName: string = "image"
+  fieldName: string = "file"
 ): Promise<T> {
   const token = getToken();
   if (!token) throw new Error("No access token found");

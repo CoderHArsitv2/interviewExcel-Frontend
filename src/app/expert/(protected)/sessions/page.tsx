@@ -9,18 +9,9 @@ import GenerateWeeklySlotsModal from "@/app/components/GenerateSlotModal";
 import { useAuth } from "@/hooks/useAuth";
 import { authenticatedGet } from "@/providers/api";
 import { Calendar, CheckCircle2, Clock, XCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import StatusPill from "@/app/components/StatusPill";
 
-type Session = {
-  id: number;
-  studentName: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  status: "upcoming" | "completed" | "cancelled";
-};
-
-export type SlotStatus = "AVAILABLE" | "BOOKED";
+export type SlotStatus = "available" | "booked";
 
 export type AvailabilitySlot = {
   id: number;
@@ -31,49 +22,84 @@ export type AvailabilitySlot = {
   status: SlotStatus;
 };
 
+// Which tab maps to which `filter` query param on /expert/all-slots.
+type SlotFilter = "upcoming" | "past" | "all";
+const TAB_TO_FILTER: Record<string, SlotFilter> = {
+  upcoming: "upcoming",
+  past: "past",
+  availability: "all",
+};
+
+const SlotsLoader = () => (
+  <div className="flex justify-center items-center py-16">
+    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary" />
+  </div>
+);
+
 const ExpertSessionsPage = () => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [sessions] = useState<Session[]>([]);
-  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>("upcoming");
+  // Cache slots per filter so switching tabs doesn't refetch.
+  const [slotsByFilter, setSlotsByFilter] = useState<
+    Record<SlotFilter, AvailabilitySlot[] | undefined>
+  >({ upcoming: undefined, past: undefined, all: undefined });
+  const [loading, setLoading] = useState(false);
 
-  // Fetch sessions + slots from backend
+  const activeFilter = TAB_TO_FILTER[activeTab];
+
+  // Fetch the active tab's slots (if not already cached) using a query param.
   useEffect(() => {
     if (!user?.uuid) return;
+    if (slotsByFilter[activeFilter]) return; // already loaded
 
-    const fetchData = async () => {
+    let cancelled = false;
+    const fetchSlots = async () => {
       try {
         setLoading(true);
-
-        // ✅ Fetch sessions
-        const sessionsRes = await authenticatedGet<AvailabilitySlot[]>(`/expert/all-slots`);
-        setSlots(sessionsRes || []);
+        const res = await authenticatedGet<AvailabilitySlot[]>(
+          `/expert/all-slots?filter=${activeFilter}`
+        );
+        if (!cancelled) {
+          setSlotsByFilter((prev) => ({ ...prev, [activeFilter]: res || [] }));
+        }
       } catch (err) {
-        console.warn("Error fetching sessions/slots:", err);
+        console.warn("Error fetching slots:", err);
+        if (!cancelled) {
+          setSlotsByFilter((prev) => ({ ...prev, [activeFilter]: [] }));
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
-    fetchData();
-  }, [user?.uuid]);
+    fetchSlots();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uuid, activeFilter, slotsByFilter]);
 
-  // Booked slots are the expert's upcoming sessions.
-  const bookedSlots = slots
-    .filter((s) => s.status === "BOOKED")
+  // Invalidate a cached filter so it refetches next time it's viewed.
+  const invalidate = (filter: SlotFilter) =>
+    setSlotsByFilter((prev) => ({ ...prev, [filter]: undefined }));
+
+  // Upcoming = booked slots, soonest first.
+  const upcomingSlots = (slotsByFilter.upcoming || [])
+    .filter((s) => s.status?.toLowerCase() === "booked")
     .sort(
       (a, b) =>
         new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
     );
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  // Past = most recent first.
+  const pastSlots = (slotsByFilter.past || []).sort(
+    (a, b) =>
+      new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
+  );
+
+  const allSlots = slotsByFilter.all || [];
+
+  const isTabLoading = loading && !slotsByFilter[activeFilter];
 
   return (
     <div className="max-w-7xl mx-auto mb-10 my-6 px-4">
@@ -96,7 +122,11 @@ const ExpertSessionsPage = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="upcoming" className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
           <TabsList className="grid w-full md:w-[400px] grid-cols-3 bg-amber-50 p-1 rounded-xl mb-8">
             <TabsTrigger value="upcoming" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Upcoming</TabsTrigger>
             <TabsTrigger value="past" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Past</TabsTrigger>
@@ -105,14 +135,16 @@ const ExpertSessionsPage = () => {
 
           {/* Upcoming Sessions */}
           <TabsContent value="upcoming" className="space-y-4">
-            {bookedSlots.length === 0 ? (
+            {isTabLoading ? (
+              <SlotsLoader />
+            ) : upcomingSlots.length === 0 ? (
               <div className="text-center py-12 bg-white/30 rounded-2xl border border-dashed border-gray-300">
                 <Calendar className="w-12 h-12 mx-auto text-gray-300 mb-3" />
                 <p className="text-gray-500 font-medium">No upcoming sessions scheduled</p>
                 <p className="text-sm text-gray-400">Generate slots to get booked!</p>
               </div>
             ) : (
-              bookedSlots.map((slot) => (
+              upcomingSlots.map((slot) => (
                 <div
                   key={slot.id}
                   className="bg-white/60 backdrop-blur-sm p-5 rounded-xl flex flex-col md:flex-row justify-between items-center border border-white/50 shadow-sm hover:shadow-md transition-all"
@@ -122,9 +154,12 @@ const ExpertSessionsPage = () => {
                       <Calendar className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-bold text-lg text-gray-900">
-                        Booked Session
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-lg text-gray-900">
+                          Booked Session
+                        </p>
+                        <StatusPill status={slot.status} size="sm" />
+                      </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Clock className="w-4 h-4" />
                         {format(new Date(slot.start_time), "MMM dd, yyyy")} • {format(new Date(slot.start_time), "h:mm a")} - {format(new Date(slot.end_time), "h:mm a")}
@@ -151,32 +186,38 @@ const ExpertSessionsPage = () => {
 
           {/* Past Sessions */}
           <TabsContent value="past" className="space-y-4">
-            {sessions.filter((s) => s.status === "completed").length === 0 ? (
+            {isTabLoading ? (
+              <SlotsLoader />
+            ) : pastSlots.length === 0 ? (
               <div className="text-center py-12 bg-white/30 rounded-2xl border border-dashed border-gray-300">
                 <Clock className="w-12 h-12 mx-auto text-gray-300 mb-3" />
                 <p className="text-gray-500 font-medium">No past sessions found</p>
               </div>
             ) : (
-              sessions
-                .filter((s) => s.status === "completed")
-                .map((session) => (
-                  <div
-                    key={session.id}
-                    className="bg-gray-50/50 p-5 rounded-xl flex justify-between items-center border border-gray-100"
-                  >
+              pastSlots.map((slot) => (
+                <div
+                  key={slot.id}
+                  className="bg-gray-50/50 p-5 rounded-xl flex justify-between items-center border border-gray-100"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="bg-gray-200 p-3 rounded-full text-gray-500">
+                      <Calendar className="w-6 h-6" />
+                    </div>
                     <div>
                       <p className="font-semibold text-lg text-gray-700">
-                        {session.studentName}
+                        {slot.status?.toLowerCase() === "booked"
+                          ? "Booked Session"
+                          : "Open Slot"}
                       </p>
-                      <p className="text-sm text-gray-500">
-                        {format(new Date(session.date), "MMM dd, yyyy")} | {session.startTime} - {session.endTime}
+                      <p className="flex items-center gap-2 text-sm text-gray-500">
+                        <Clock className="w-4 h-4" />
+                        {format(new Date(slot.start_time), "MMM dd, yyyy")} • {format(new Date(slot.start_time), "h:mm a")} - {format(new Date(slot.end_time), "h:mm a")}
                       </p>
                     </div>
-                    <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100">
-                      Completed
-                    </Badge>
                   </div>
-                ))
+                  <StatusPill status={slot.status} />
+                </div>
+              ))
             )}
           </TabsContent>
 
@@ -186,7 +227,11 @@ const ExpertSessionsPage = () => {
             className="flex flex-col gap-6"
           >
             <div className="bg-white/50 rounded-2xl p-6 border border-white/60 shadow-sm">
-              <WeeklyCalendar slots={slots} />
+              {isTabLoading ? (
+                <SlotsLoader />
+              ) : (
+                <WeeklyCalendar slots={allSlots} />
+              )}
             </div>
           </TabsContent>
         </Tabs>
@@ -196,7 +241,12 @@ const ExpertSessionsPage = () => {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         expertId={user?.uuid || ""}
-        onSave={() => setIsOpen(false)}
+        onSave={() => {
+          setIsOpen(false);
+          // New slots affect availability + upcoming — refetch those next view.
+          invalidate("all");
+          invalidate("upcoming");
+        }}
       />
     </div>
   );

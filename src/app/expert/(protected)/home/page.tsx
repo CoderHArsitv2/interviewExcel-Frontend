@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import StatusPill from "@/app/components/StatusPill";
 import { useRouter } from "next/navigation";
 import {
     Users,
@@ -95,18 +96,6 @@ function formatSessionTime(iso: string) {
         minute: "2-digit",
         hour12: true,
     });
-}
-
-// ─── Status badge color mapping ─────────────────────────────────────────────
-
-function statusBadge(status: string) {
-    const map: Record<string, { bg: string; text: string; label: string }> = {
-        scheduled: { bg: "bg-blue-100", text: "text-blue-700", label: "Scheduled" },
-        completed: { bg: "bg-green-100", text: "text-green-700", label: "Completed" },
-        cancelled: { bg: "bg-red-100", text: "text-red-700", label: "Cancelled" },
-    };
-    const s = map[status] ?? { bg: "bg-gray-100", text: "text-gray-700", label: status };
-    return s;
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -349,7 +338,6 @@ const ExpertDashboardPage = () => {
                     ) : (
                         <div className="space-y-3">
                             {upcoming_sessions.map((session) => {
-                                const sb = statusBadge(session.status);
                                 return (
                                     <div
                                         key={session.id}
@@ -371,9 +359,9 @@ const ExpertDashboardPage = () => {
                                                 </span>
                                             </div>
                                         </div>
-                                        <Badge className={`${sb.bg} ${sb.text} hover:${sb.bg} border-transparent shrink-0`}>
-                                            {sb.label}
-                                        </Badge>
+                                        <div className="shrink-0">
+                                            <StatusPill status={session.status} />
+                                        </div>
                                         {session.meet_link && (
                                             <Button
                                                 size="sm"

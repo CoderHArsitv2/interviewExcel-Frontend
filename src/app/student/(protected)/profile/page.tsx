@@ -100,7 +100,7 @@ const StudentProfilePage = () => {
 
           {/* Upload Profile Photo */}
           <ProfileImageUpload
-            uploadUrl="/student/profile/picture"
+            uploadUrl="/upload/image"
             fallbackName={studentProfile?.full_name || user?.full_name || "Student"}
             onUploaded={() => setReloadKey((k) => k + 1)}
           />

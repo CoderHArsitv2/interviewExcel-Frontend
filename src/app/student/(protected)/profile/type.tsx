@@ -11,4 +11,10 @@ export type StudentProfileResponse = {
   city: string;
   about_me: string;
   skills: string[];
+  /** Google avatar, if the account was created via OAuth. */
+  picture?: string;
+  /** Durable object key — round-tripped on save so edits never drop the photo. */
+  profile_picture_key?: string | null;
+  /** Presigned R2 URL; expires after 24h, so re-fetch rather than caching it. */
+  profile_picture_url?: string;
 };

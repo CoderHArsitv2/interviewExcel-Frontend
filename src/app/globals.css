@@ -151,6 +151,58 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  /* Student Theme (Violet/Purple & Sky) — mirrors the .expert scope below.
+     Applied by PortalLayout so `bg-primary`/`text-primary` inside the student
+     portal resolve violet instead of the sky-blue :root default. */
+  .student {
+    --primary: 262 83% 58%;
+    /* Violet 500 */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 199 89% 48%;
+    /* Sky 500 */
+    --secondary-foreground: 210 40% 98%;
+
+    --ring: 262 83% 58%;
+
+    --sidebar-primary: 262 83% 58%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-ring: 262 83% 58%;
+
+    /* Tailwind v4 resolves --color-* at :root, so overriding --primary alone
+       does nothing for text-primary/bg-primary utilities. Re-declare the theme
+       tokens in this scope so they re-resolve against the violet values above. */
+    --color-primary: hsl(var(--primary));
+    --color-primary-foreground: hsl(var(--primary-foreground));
+    --color-secondary: hsl(var(--secondary));
+    --color-secondary-foreground: hsl(var(--secondary-foreground));
+    --color-ring: hsl(var(--ring));
+    --color-sidebar-primary: hsl(var(--sidebar-primary));
+    --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+    --color-sidebar-ring: hsl(var(--sidebar-ring));
+  }
+
+  .student.dark,
+  .dark .student {
+    /* Lighter violet so it holds contrast on the dark surface */
+    --primary: 258 90% 66%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 199 89% 55%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --sidebar-primary: 258 90% 66%;
+    --sidebar-primary-foreground: 210 40% 98%;
+
+    /* Re-resolve theme tokens for dark student scope (see note above). */
+    --color-primary: hsl(var(--primary));
+    --color-primary-foreground: hsl(var(--primary-foreground));
+    --color-secondary: hsl(var(--secondary));
+    --color-secondary-foreground: hsl(var(--secondary-foreground));
+    --color-sidebar-primary: hsl(var(--sidebar-primary));
+    --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  }
+
   /* Expert Theme (Gold/Amber & Deep Blue) */
   .expert {
     /* Light Mode Expert */
@@ -272,8 +324,42 @@
   animation: shimmer 2.5s infinite;
 }
 
-/* Smooth scrolling */
+/* Reusable Profile & Portal Utilities */
+.profile-card {
+  @apply bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-xl shadow-slate-200/40 dark:shadow-black/40;
+}
+
+.profile-badge-expert {
+  @apply px-3 py-1 rounded-full text-xs font-bold bg-amber-100/80 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/40 shadow-sm;
+}
+
+.profile-badge-student {
+  @apply px-3 py-1 rounded-full text-xs font-bold bg-purple-100/80 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/40 shadow-sm;
+}
+
+.detail-item-card {
+  @apply p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/60 dark:border-white/5 flex flex-col justify-between transition-all hover:bg-white dark:hover:bg-slate-800;
+}
+
+.btn-student-primary {
+  @apply px-6 py-2.5 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all;
+}
+
+.btn-student-secondary {
+  @apply px-6 py-2.5 rounded-2xl border-2 border-purple-300/80 dark:border-purple-700/60 bg-purple-50/60 dark:bg-purple-950/30 text-purple-900 dark:text-purple-200 hover:bg-purple-100/80 dark:hover:bg-purple-900/50 font-semibold shadow-sm transition-all;
+}
+
+.btn-expert-primary {
+  @apply px-6 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-slate-950 font-bold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all;
+}
+
+.btn-expert-secondary {
+  @apply px-6 py-2.5 rounded-2xl border-2 border-amber-300/80 dark:border-amber-700/60 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 hover:bg-amber-100/80 dark:hover:bg-amber-900/50 font-semibold shadow-sm transition-all;
+}
+
+
+
+/* Smooth scrolling for the landing page anchor nav */
 html {
   scroll-behavior: smooth;
 }
-

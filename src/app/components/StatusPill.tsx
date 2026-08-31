@@ -27,19 +27,22 @@ const STATUS_MAP: Record<string, StatusConfig> = {
 };
 
 const TONE_CLASSES: Record<Tone, string> = {
-  emerald: "bg-emerald-100 text-emerald-700",
-  rose: "bg-rose-100 text-rose-700",
-  blue: "bg-blue-100 text-blue-700",
-  green: "bg-green-100 text-green-700",
-  red: "bg-red-100 text-red-700",
-  amber: "bg-amber-100 text-amber-700",
-  gray: "bg-gray-100 text-gray-700",
+  emerald:
+    "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800/40",
+  rose: "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/70 dark:border-rose-800/40",
+  blue: "bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800/40",
+  green:
+    "bg-green-100 text-green-700 dark:bg-green-950/60 dark:text-green-300 border border-green-200/70 dark:border-green-800/40",
+  red: "bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300 border border-red-200/70 dark:border-red-800/40",
+  amber:
+    "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800/40",
+  gray: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200/70 dark:border-white/10",
 };
 
 const DOT_CLASSES: Record<Tone, string> = {
   emerald: "bg-emerald-500",
   rose: "bg-rose-500",
-  blue: "bg-blue-500",
+  blue: "bg-sky-500",
   green: "bg-green-500",
   red: "bg-red-500",
   amber: "bg-amber-500",

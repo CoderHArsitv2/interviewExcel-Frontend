@@ -434,7 +434,7 @@ export default function HeroSection() {
             {/* Floating Pastel Badge #1 */}
             <div
               ref={cardFloat1Ref}
-              className="absolute -top-6 -right-4 sm:-right-8 bg-white/95 dark:bg-slate-900/95 p-4 rounded-3xl shadow-xl shadow-emerald-500/10 border border-emerald-200 dark:border-emerald-800/50 backdrop-blur-xl z-20"
+              className="absolute -top-12 -right-4 sm:-right-8 bg-white/95 dark:bg-slate-900/95 p-4 rounded-3xl shadow-xl shadow-emerald-500/10 border border-emerald-200 dark:border-emerald-800/50 backdrop-blur-xl z-20"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-950 rounded-2xl flex items-center justify-center border border-emerald-200 dark:border-emerald-700 shadow-inner">

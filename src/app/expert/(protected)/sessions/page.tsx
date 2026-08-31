@@ -8,7 +8,13 @@ import { useState, useEffect } from "react";
 import GenerateWeeklySlotsModal from "@/app/components/GenerateSlotModal";
 import { useAuth } from "@/hooks/useAuth";
 import { authenticatedGet } from "@/providers/api";
-import { Calendar, CheckCircle2, Clock, XCircle } from "lucide-react";
+import {
+  Calendar,
+  CalendarPlus,
+  CheckCircle2,
+  Clock,
+  XCircle,
+} from "lucide-react";
 import StatusPill from "@/app/components/StatusPill";
 
 export type SlotStatus = "available" | "booked";
@@ -30,11 +36,38 @@ const TAB_TO_FILTER: Record<string, SlotFilter> = {
   availability: "all",
 };
 
+const TAB_TRIGGER_CLASS =
+  "rounded-xl h-9 font-semibold text-slate-600 dark:text-slate-400 transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-amber-700 dark:data-[state=active]:text-amber-300 data-[state=active]:shadow-sm";
+
 const SlotsLoader = () => (
   <div className="flex justify-center items-center py-16">
-    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary" />
+    <span className="h-10 w-10 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
   </div>
 );
+
+const EmptyState = ({
+  icon: Icon,
+  title,
+  hint,
+}: {
+  icon: typeof Calendar;
+  title: string;
+  hint?: string;
+}) => (
+  <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-300 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/30">
+    <Icon className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600 mb-3" />
+    <p className="font-semibold text-slate-700 dark:text-slate-200">{title}</p>
+    {hint && (
+      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{hint}</p>
+    )}
+  </div>
+);
+
+const formatSlotRange = (slot: AvailabilitySlot) =>
+  `${format(new Date(slot.start_time), "MMM dd, yyyy")} • ${format(
+    new Date(slot.start_time),
+    "h:mm a"
+  )} – ${format(new Date(slot.end_time), "h:mm a")}`;
 
 const ExpertSessionsPage = () => {
   const { user } = useAuth();
@@ -102,140 +135,146 @@ const ExpertSessionsPage = () => {
   const isTabLoading = loading && !slotsByFilter[activeFilter];
 
   return (
-    <div className="max-w-7xl mx-auto mb-10 my-6 px-4">
-      <div className="glass rounded-3xl border border-white/40 p-6 md:p-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-              Manage <span className="text-primary">Sessions</span>
-            </h1>
-            <p className="text-gray-500 mt-1">
-              View upcoming meetings and manage your availability.
+    <div className="space-y-6">
+      {/* ── Toolbar ── */}
+      <div className="profile-card p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <span className="shrink-0 p-2.5 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300">
+            <Calendar className="w-6 h-6" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+              Manage Sessions
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              View upcoming meetings and manage your weekly availability.
             </p>
           </div>
-          <Button
-            size="lg"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg shadow-primary/20"
-            onClick={() => setIsOpen(true)}
-          >
-            + Generate Slots
-          </Button>
         </div>
 
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="w-full"
+        <button
+          onClick={() => setIsOpen(true)}
+          className="btn-expert-primary shrink-0 flex items-center justify-center gap-2"
         >
-          <TabsList className="grid w-full md:w-[400px] grid-cols-3 bg-amber-50 p-1 rounded-xl mb-8">
-            <TabsTrigger value="upcoming" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Upcoming</TabsTrigger>
-            <TabsTrigger value="past" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Past</TabsTrigger>
-            <TabsTrigger value="availability" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">Availability</TabsTrigger>
-          </TabsList>
-
-          {/* Upcoming Sessions */}
-          <TabsContent value="upcoming" className="space-y-4">
-            {isTabLoading ? (
-              <SlotsLoader />
-            ) : upcomingSlots.length === 0 ? (
-              <div className="text-center py-12 bg-white/30 rounded-2xl border border-dashed border-gray-300">
-                <Calendar className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-500 font-medium">No upcoming sessions scheduled</p>
-                <p className="text-sm text-gray-400">Generate slots to get booked!</p>
-              </div>
-            ) : (
-              upcomingSlots.map((slot) => (
-                <div
-                  key={slot.id}
-                  className="bg-white/60 backdrop-blur-sm p-5 rounded-xl flex flex-col md:flex-row justify-between items-center border border-white/50 shadow-sm hover:shadow-md transition-all"
-                >
-                  <div className="flex items-center gap-4 mb-4 md:mb-0">
-                    <div className="bg-amber-100 p-3 rounded-full text-amber-600">
-                      <Calendar className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold text-lg text-gray-900">
-                          Booked Session
-                        </p>
-                        <StatusPill status={slot.status} size="sm" />
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Clock className="w-4 h-4" />
-                        {format(new Date(slot.start_time), "MMM dd, yyyy")} • {format(new Date(slot.start_time), "h:mm a")} - {format(new Date(slot.end_time), "h:mm a")}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 w-full md:w-auto">
-                    <Button
-                      size="sm"
-                      className="flex-1 md:flex-none bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      <CheckCircle2 className="w-4 h-4 mr-2" />
-                      Complete
-                    </Button>
-                    <Button size="sm" variant="destructive" className="flex-1 md:flex-none">
-                      <XCircle className="w-4 h-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              ))
-            )}
-          </TabsContent>
-
-          {/* Past Sessions */}
-          <TabsContent value="past" className="space-y-4">
-            {isTabLoading ? (
-              <SlotsLoader />
-            ) : pastSlots.length === 0 ? (
-              <div className="text-center py-12 bg-white/30 rounded-2xl border border-dashed border-gray-300">
-                <Clock className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-500 font-medium">No past sessions found</p>
-              </div>
-            ) : (
-              pastSlots.map((slot) => (
-                <div
-                  key={slot.id}
-                  className="bg-gray-50/50 p-5 rounded-xl flex justify-between items-center border border-gray-100"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="bg-gray-200 p-3 rounded-full text-gray-500">
-                      <Calendar className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-lg text-gray-700">
-                        {slot.status?.toLowerCase() === "booked"
-                          ? "Booked Session"
-                          : "Open Slot"}
-                      </p>
-                      <p className="flex items-center gap-2 text-sm text-gray-500">
-                        <Clock className="w-4 h-4" />
-                        {format(new Date(slot.start_time), "MMM dd, yyyy")} • {format(new Date(slot.start_time), "h:mm a")} - {format(new Date(slot.end_time), "h:mm a")}
-                      </p>
-                    </div>
-                  </div>
-                  <StatusPill status={slot.status} />
-                </div>
-              ))
-            )}
-          </TabsContent>
-
-          {/* Availability */}
-          <TabsContent
-            value="availability"
-            className="flex flex-col gap-6"
-          >
-            <div className="bg-white/50 rounded-2xl p-6 border border-white/60 shadow-sm">
-              {isTabLoading ? (
-                <SlotsLoader />
-              ) : (
-                <WeeklyCalendar slots={allSlots} />
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+          <CalendarPlus className="w-4 h-4" />
+          Generate Slots
+        </button>
       </div>
+
+      {/* ── Tabs ── */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid h-auto w-full md:w-[420px] grid-cols-3 gap-1 p-1 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/30 mb-5">
+          <TabsTrigger value="upcoming" className={TAB_TRIGGER_CLASS}>
+            Upcoming
+          </TabsTrigger>
+          <TabsTrigger value="past" className={TAB_TRIGGER_CLASS}>
+            Past
+          </TabsTrigger>
+          <TabsTrigger value="availability" className={TAB_TRIGGER_CLASS}>
+            Availability
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Upcoming Sessions */}
+        <TabsContent value="upcoming" className="space-y-3">
+          {isTabLoading ? (
+            <SlotsLoader />
+          ) : upcomingSlots.length === 0 ? (
+            <EmptyState
+              icon={Calendar}
+              title="No upcoming sessions scheduled"
+              hint="Generate slots to get booked!"
+            />
+          ) : (
+            upcomingSlots.map((slot) => (
+              <div
+                key={slot.id}
+                className="profile-card p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-amber-300/70 dark:hover:border-amber-700/50 transition-colors"
+              >
+                <div className="flex items-center gap-4 min-w-0">
+                  <span className="shrink-0 p-3 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300">
+                    <Calendar className="w-6 h-6" />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-bold text-base sm:text-lg text-slate-900 dark:text-white">
+                        Booked Session
+                      </p>
+                      <StatusPill status={slot.status} size="sm" />
+                    </div>
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                      <Clock className="w-4 h-4 shrink-0" />
+                      <span className="truncate">{formatSlotRange(slot)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 w-full md:w-auto shrink-0">
+                  <Button
+                    size="sm"
+                    className="flex-1 md:flex-none rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm"
+                  >
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Complete
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="flex-1 md:flex-none rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 dark:text-rose-300 font-semibold border border-rose-200/70 dark:border-rose-800/40 shadow-sm"
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
+        </TabsContent>
+
+        {/* Past Sessions */}
+        <TabsContent value="past" className="space-y-3">
+          {isTabLoading ? (
+            <SlotsLoader />
+          ) : pastSlots.length === 0 ? (
+            <EmptyState icon={Clock} title="No past sessions found" />
+          ) : (
+            pastSlots.map((slot) => (
+              <div
+                key={slot.id}
+                className="profile-card p-4 sm:p-5 flex items-center justify-between gap-4 opacity-90"
+              >
+                <div className="flex items-center gap-4 min-w-0">
+                  <span className="shrink-0 p-3 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                    <Calendar className="w-6 h-6" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-base sm:text-lg text-slate-700 dark:text-slate-200">
+                      {slot.status?.toLowerCase() === "booked"
+                        ? "Booked Session"
+                        : "Open Slot"}
+                    </p>
+                    <p className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                      <Clock className="w-4 h-4 shrink-0" />
+                      <span className="truncate">{formatSlotRange(slot)}</span>
+                    </p>
+                  </div>
+                </div>
+                <StatusPill status={slot.status} className="shrink-0" />
+              </div>
+            ))
+          )}
+        </TabsContent>
+
+        {/* Availability */}
+        <TabsContent value="availability">
+          <div className="profile-card p-4 sm:p-6">
+            {isTabLoading ? (
+              <SlotsLoader />
+            ) : (
+              <WeeklyCalendar slots={allSlots} />
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <GenerateWeeklySlotsModal
         isOpen={isOpen}

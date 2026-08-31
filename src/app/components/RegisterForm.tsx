@@ -4,16 +4,16 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { FormProvider, useForm } from "react-hook-form";
-import type { Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { post } from "@/providers/api";
 import Image from "next/image";
 import Link from "next/link";
 import { StudentSignUpFormValues } from "@/types/schemas/SignUpSchema";
-import { Fields, signUpFormFields } from "@/types/formConfig";
+import { signUpFormFields } from "@/types/formConfig";
+import { FormFields } from "@/app/components/form";
 import toast from "react-hot-toast";
 import { setToken } from "@/providers/authProvider";
-import { User, Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, UserCheck, ShieldCheck } from "lucide-react";
+import { ArrowRight, Sparkles, UserCheck } from "lucide-react";
 
 interface RegisterFormProps {
   setMode: React.Dispatch<React.SetStateAction<"signin" | "signup">>;
@@ -23,8 +23,6 @@ interface RegisterFormProps {
 export default function RegisterForm({ setMode, role }: RegisterFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const isStudent = role === "student";
 
@@ -39,7 +37,7 @@ export default function RegisterForm({ setMode, role }: RegisterFormProps) {
     },
   });
 
-  const { handleSubmit, reset, formState } = methods;
+  const { handleSubmit, reset } = methods;
 
   const onSubmit = async (data: StudentSignUpFormValues) => {
     setIsLoading(true);
@@ -78,17 +76,6 @@ export default function RegisterForm({ setMode, role }: RegisterFormProps) {
     }
   };
 
-  const formConfig = signUpFormFields.fields as Array<
-    Omit<Fields, "name"> & { name: Path<StudentSignUpFormValues> }
-  >;
-
-  const getFieldIcon = (name: string) => {
-    if (name === "full_name") return <User className="w-4 h-4 text-slate-400 dark:text-slate-500" />;
-    if (name === "email") return <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500" />;
-    if (name === "password") return <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500" />;
-    if (name === "confirm_password") return <ShieldCheck className="w-4 h-4 text-slate-400 dark:text-slate-500" />;
-    return null;
-  };
 
   return (
     <div className="w-full flex flex-col items-center justify-center">
@@ -137,64 +124,10 @@ export default function RegisterForm({ setMode, role }: RegisterFormProps) {
         {/* Form Fields */}
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5">
-            {formConfig.map((field) => {
-              const isPasswordField = field.name === "password";
-              const isConfirmPasswordField = field.name === "confirm_password";
-              const hasError = !!formState.errors[field.name];
-
-              const isPasswordType = isPasswordField || isConfirmPasswordField;
-              const isVisible = isPasswordField ? showPassword : showConfirmPassword;
-              const toggleVisibility = isPasswordField
-                ? () => setShowPassword(!showPassword)
-                : () => setShowConfirmPassword(!showConfirmPassword);
-
-              return (
-                <div key={field.name} className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                    <span>{field.label}</span>
-                    {field.required && <span className="text-rose-500 font-normal">*</span>}
-                  </label>
-
-                  <div className="relative flex items-center">
-                    <div className="absolute left-3.5 pointer-events-none">
-                      {getFieldIcon(field.name)}
-                    </div>
-
-                    <input
-                      type={isPasswordType ? (isVisible ? "text" : "password") : field.type}
-                      placeholder={field.placeholder || `Enter your ${field.label.toLowerCase()}`}
-                      {...methods.register(field.name)}
-                      className={`w-full pl-10 pr-10 py-3 rounded-2xl border text-sm sm:text-base outline-none transition-all duration-200 bg-slate-50/70 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 hover:bg-white dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 ${
-                        hasError
-                          ? "border-rose-500 focus:ring-4 focus:ring-rose-500/20"
-                          : "border-slate-200 dark:border-slate-700 focus:border-purple-500 dark:focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15"
-                      }`}
-                    />
-
-                    {isPasswordType && (
-                      <button
-                        type="button"
-                        onClick={toggleVisibility}
-                        className="absolute right-3 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                        aria-label={isVisible ? "Hide password" : "Show password"}
-                      >
-                        {isVisible ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-
-                  {hasError && (
-                    <p className="text-rose-500 text-xs font-medium px-1">
-                      {formState.errors[field.name]?.message as string}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
+            <FormFields
+              fields={signUpFormFields.fields}
+              accent={isStudent ? "student" : "expert"}
+            />
 
             {/* Submit Button */}
             <button

@@ -193,7 +193,7 @@ export const editExpertProfileFormFields = {
       label: "Fee Per Session",
       type: "number",
       required: true,
-      placholder: "What Fees Will you charge",
+      placeholder: "What Fees Will you charge",
     },
   ],
   schema: editExpertProfileSchema,

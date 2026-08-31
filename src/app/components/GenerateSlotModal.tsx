@@ -5,11 +5,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FieldErrors, FieldValues, FormProvider, get, Path, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { authenticatedPost, ApiResponse } from "@/providers/api";
 import { GenerateWeeklySlotFormValues } from "@/types/schemas/generateSlotSchema";
-import { Fields, generateWeeklySlotFormFields } from "@/types/formConfig";
+import { generateWeeklySlotFormFields } from "@/types/formConfig";
+import { FormFields } from "@/app/components/form";
+import { CalendarPlus, Loader2 } from "lucide-react";
 
 interface GenerateWeeklySlotsModalProps {
   isOpen: boolean;
@@ -17,13 +19,6 @@ interface GenerateWeeklySlotsModalProps {
   expertId: string | null;
   onSave: (slots: unknown[]) => void; // callback after success
 }
-function getError<T extends FieldValues>(
-  errors: FieldErrors<T>,
-  name: Path<T>
-) {
-  return get(errors, name);
-}
-
 export default function GenerateWeeklySlotsModal({
   isOpen,
   onClose,
@@ -43,10 +38,13 @@ export default function GenerateWeeklySlotsModal({
 
   const onSubmit = async (data: GenerateWeeklySlotFormValues) => {
     try {
-      const res = await authenticatedPost<ApiResponse<unknown>>("/expert/generate-slots", {
-        ...data,
-        expert_id: expertId,
-      });
+      const res = await authenticatedPost<ApiResponse<unknown>>(
+        "/expert/generate-slots",
+        {
+          ...data,
+          expert_id: expertId,
+        }
+      );
 
       toast.success("Weekly slots generated successfully");
 
@@ -56,82 +54,63 @@ export default function GenerateWeeklySlotsModal({
     } catch (err: unknown) {
       const error = err as { message?: string };
       console.warn(error);
+      toast.error(error?.message || "Failed to generate slots");
     }
   };
 
-  const formConfig = generateWeeklySlotFormFields.fields as Array<
-    Omit<Fields, "name"> & { name: Path<GenerateWeeklySlotFormValues> }
-  >;
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm bg-white border-theme rounded-lg p-6">
-        <DialogHeader>
-          <DialogTitle>Generate Weekly Availability</DialogTitle>
+      <DialogContent className="max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <DialogHeader className="mb-4">
+          <div className="flex items-center gap-2">
+            <span className="p-2 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300">
+              <CalendarPlus className="w-5 h-5" />
+            </span>
+            <div>
+              <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+                Generate Weekly Availability
+              </DialogTitle>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Pick your hours and days — we&apos;ll split them into bookable
+                slots.
+              </p>
+            </div>
+          </div>
         </DialogHeader>
+
         <FormProvider {...methods}>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col gap-4"
-          >
-            {formConfig.map((field) => {
-              const error = getError(formState.errors, field.name);
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="max-h-[60vh] overflow-y-auto pr-1">
+              <FormFields
+                fields={generateWeeklySlotFormFields.fields}
+                accent="expert"
+                columns={2}
+                withIcons={false}
+              />
+            </div>
 
-              if (field.type === "checkbox" && field.options) {
-                return (
-                  <div key={field.name} className="flex flex-col gap-2">
-                    <label className="font-medium text-sm">{field.label}</label>
-                    <div className="flex flex-wrap gap-3">
-                      {field.options.map((option) => (
-                        <label key={option.value} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            value={option.value}
-                            {...methods.register(field.name)}
-                            className="w-4 h-4 accent-amber-600"
-                          />
-                          <span className="text-sm">{option.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                    {error && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {(error as { message?: string })?.message}
-                      </p>
-                    )}
-                  </div>
-                );
-              }
-
-              // default input (time, number, text, etc.)
-              return (
-                <div key={field.name} className="flex flex-col">
-                  <label className="font-medium text-sm mb-1">{field.label}</label>
-                  <input
-                    type={field.type}
-                    placeholder={field.placeholder || field.label}
-                    {...methods.register(field.name, { valueAsNumber: field.type === "number" })}
-                    className={`p-3 border-2 rounded-lg outline-none transition text-sm sm:text-base ${error
-                      ? "border-red-500"
-                      : "border-gray-300 focus:ring-2 focus:ring-amber-500"
-                      }`}
-                  />
-                  {error && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {(error as { message?: string })?.message}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="bg-amber-600 text-white p-3 rounded-lg font-semibold hover:bg-amber-700 transition"
-            >
-              Generate Slots
-            </button>
+            {/* Modal Actions */}
+            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/10 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={formState.isSubmitting}
+                className="btn-expert-primary text-sm flex items-center gap-2 disabled:opacity-60"
+              >
+                {formState.isSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CalendarPlus className="w-4 h-4" />
+                )}
+                <span>Generate Slots</span>
+              </button>
+            </div>
           </form>
         </FormProvider>
       </DialogContent>

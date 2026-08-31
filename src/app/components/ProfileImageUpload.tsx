@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Loader2, Upload, X } from "lucide-react";
+import { Camera, CheckCircle2, Loader2, Upload, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -13,32 +13,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { uploadFile, UploadImageResponse } from "@/providers/api";
+import { cn } from "@/lib/utils";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-// Mirrors the server-side allowlist for POST /upload/image.
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 interface ProfileImageUploadProps {
-  /** API endpoint the image is POSTed to (multipart/form-data). */
   uploadUrl: string;
-  /** Currently saved image URL (presigned, ephemeral), if any. */
   currentImageUrl?: string;
-  /** Last-resort remote image (e.g. the Google avatar) before initials. */
   fallbackImageUrl?: string;
-  /** Name used for the avatar fallback initials. */
   fallbackName?: string;
-  /** Form field name expected by the backend. Defaults to "file". */
   fieldName?: string;
+  role?: string;
   /**
-   * Called with the upload record after a successful upload. Persisting
-   * `file_key` onto the profile is the caller's job — the spinner stays up
-   * until the returned promise settles.
+   * "inline" renders just the avatar + camera affordance, meant to sit inside an
+   * existing profile card. "card" wraps that in its own titled card.
    */
+  variant?: "inline" | "card";
+  /** Shows the green verified tick on the avatar (inline variant). */
+  verified?: boolean;
   onUploaded?: (result: UploadImageResponse) => void | Promise<void>;
-  /**
-   * Called when the current image fails to load. Presigned URLs expire after
-   * 24h, so a long-lived page should re-fetch the profile to get a fresh one.
-   */
   onImageError?: () => void;
 }
 
@@ -48,35 +42,33 @@ export default function ProfileImageUpload({
   fallbackImageUrl,
   fallbackName = "User",
   fieldName = "file",
+  role = "expert",
+  variant = "card",
+  verified = false,
   onUploaded,
   onImageError,
 }: ProfileImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  // Presigned URL from the upload response, shown until the parent's re-fetch
-  // supplies a fresh `currentImageUrl`.
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  // Guards against an error/re-fetch loop when the image is simply broken.
   const erroredUrlRef = useRef<string | null>(null);
 
-  // Clean up the object URL to avoid memory leaks.
+  const isExpert = role === "expert";
+  const isInline = variant === "inline";
+
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
 
-  // Once the parent hands us a newer saved URL, drop the post-upload preview.
   useEffect(() => {
     setUploadedUrl(null);
   }, [currentImageUrl]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    // Reset so selecting the same file again still fires onChange.
-    e.target.value = "";
+  const acceptFile = (file: File | undefined | null) => {
     if (!file) return;
 
     if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -91,6 +83,12 @@ export default function ProfileImageUpload({
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    acceptFile(file);
   };
 
   const clearSelection = () => {
@@ -114,8 +112,6 @@ export default function ProfileImageUpload({
         return;
       }
 
-      // Keep the spinner up while the caller saves the key to the profile, so
-      // a failure there doesn't look like a successful change.
       await onUploaded?.(data);
 
       if (data.file_url) {
@@ -123,8 +119,8 @@ export default function ProfileImageUpload({
         setUploadedUrl(data.file_url);
       }
       clearSelection();
+      toast.success("Profile photo updated!");
     } catch (err) {
-      // uploadFile already surfaces a toast; keep a console trail for debugging.
       console.warn("Image upload failed:", err);
     } finally {
       setIsUploading(false);
@@ -134,103 +130,162 @@ export default function ProfileImageUpload({
   const displayUrl =
     previewUrl || uploadedUrl || currentImageUrl || fallbackImageUrl;
 
-  const handleLoadingStatusChange = (status: "idle" | "loading" | "loaded" | "error") => {
+  const handleLoadingStatusChange = (
+    status: "idle" | "loading" | "loaded" | "error"
+  ) => {
     if (status !== "error" || !displayUrl) return;
-    // A presigned URL may simply have expired (24h TTL) — ask the parent for a
-    // fresh profile, but only once per URL.
     if (erroredUrlRef.current === displayUrl) return;
     erroredUrlRef.current = displayUrl;
     onImageError?.();
   };
 
-  return (
-    <Card className="border-white/40 bg-white/60">
-      <CardHeader>
-        <CardTitle className="text-lg">Profile Photo</CardTitle>
-        <CardDescription>JPG, PNG, WebP or GIF. Max size 5 MB.</CardDescription>
-      </CardHeader>
+  const accent = isExpert
+    ? {
+        ring: "ring-amber-400/50 dark:ring-amber-500/40",
+        border: "border-amber-400/80 dark:border-amber-500/60",
+        shadow: "shadow-amber-500/20",
+        button: "bg-amber-500 hover:bg-amber-600 text-slate-950",
+        fallback:
+          "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+      }
+    : {
+        ring: "ring-purple-400/50 dark:ring-purple-500/40",
+        border: "border-purple-400/80 dark:border-purple-500/60",
+        shadow: "shadow-purple-500/20",
+        button: "bg-purple-600 hover:bg-purple-700 text-white",
+        fallback:
+          "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300",
+      };
 
-      <CardContent className="flex flex-col items-center gap-4">
-        <div className="relative">
-          <Avatar className="h-32 w-32 border-4 border-white shadow-lg ring-4 ring-primary/20">
-            <AvatarImage
-              src={displayUrl}
-              alt={fallbackName}
-              className="object-cover"
-              onLoadingStatusChange={handleLoadingStatusChange}
-            />
-            <AvatarFallback className="bg-primary/10 text-3xl font-bold text-primary">
-              {fallbackName.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-
-          <Button
-            type="button"
-            size="icon"
-            variant="secondary"
-            onClick={() => inputRef.current?.click()}
-            disabled={isUploading}
-            className="absolute bottom-1 right-1 h-9 w-9 rounded-full shadow-md"
-            aria-label="Choose profile photo"
+  const control = (
+    <div className="flex w-full flex-col items-center gap-3">
+      <div className="relative group">
+        <Avatar
+          className={cn(
+            "border-4 border-white dark:border-slate-800 shadow-xl ring-4 transition-all",
+            accent.ring,
+            accent.shadow,
+            isInline ? "h-32 w-32 sm:h-36 sm:w-36" : "h-28 w-28",
+            previewUrl && "ring-emerald-400/60"
+          )}
+        >
+          <AvatarImage
+            src={displayUrl}
+            alt={fallbackName}
+            className="object-cover"
+            onLoadingStatusChange={handleLoadingStatusChange}
+          />
+          <AvatarFallback
+            className={cn("text-2xl font-extrabold", accent.fallback)}
           >
+            {fallbackName.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+
+        {/* Verified tick sits opposite the camera so the two never collide */}
+        {isInline && verified && !selectedFile && (
+          <span className="absolute bottom-1 left-1 bg-emerald-500 text-white p-1.5 rounded-full ring-4 ring-white dark:ring-slate-900 shadow">
+            <CheckCircle2 className="h-4 w-4" />
+          </span>
+        )}
+
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={isUploading}
+          title="Change profile photo"
+          className={cn(
+            "absolute bottom-1 right-1 p-2 rounded-full shadow-lg border-2 border-white dark:border-slate-900 transition-all hover:scale-110 active:scale-95 disabled:opacity-60 disabled:hover:scale-100",
+            accent.button
+          )}
+          aria-label="Choose profile photo"
+        >
+          {isUploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
             <Camera className="h-4 w-4" />
-          </Button>
-        </div>
+          )}
+        </button>
+      </div>
 
-        <input
-          ref={inputRef}
-          type="file"
-          accept={ACCEPTED_TYPES.join(",")}
-          onChange={handleFileSelect}
-          className="hidden"
-        />
+      <input
+        ref={inputRef}
+        type="file"
+        accept={ACCEPTED_TYPES.join(",")}
+        onChange={handleFileSelect}
+        className="hidden"
+      />
 
-        {selectedFile ? (
-          <div className="flex w-full flex-col gap-2">
-            <p className="truncate text-center text-sm text-gray-600">
-              {selectedFile.name}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                onClick={handleUpload}
-                disabled={isUploading}
-                className="flex-1"
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4" />
-                    Upload
-                  </>
-                )}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={clearSelection}
-                disabled={isUploading}
-              >
-                <X className="h-4 w-4" />
-                Cancel
-              </Button>
-            </div>
+      {selectedFile ? (
+        <div className="w-full rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:bg-slate-800/50 p-2.5">
+          <p className="truncate text-center text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-2">
+            {selectedFile.name}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              onClick={handleUpload}
+              disabled={isUploading}
+              className={cn(
+                "flex-1 h-9 rounded-xl text-xs font-bold",
+                accent.button
+              )}
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-3.5 w-3.5 mr-1" />
+                  Save Photo
+                </>
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={clearSelection}
+              disabled={isUploading}
+              title="Discard"
+              className="h-9 rounded-xl text-xs border-slate-300 dark:border-slate-700"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
           </div>
-        ) : (
+        </div>
+      ) : (
+        !isInline && (
           <Button
             type="button"
             variant="outline"
             onClick={() => inputRef.current?.click()}
-            className="w-full"
+            className="w-full rounded-2xl text-xs font-semibold border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
           >
-            <Camera className="h-4 w-4" />
-            Change Photo
+            <Camera className="h-3.5 w-3.5 mr-1.5" />
+            Upload New Picture
           </Button>
-        )}
+        )
+      )}
+    </div>
+  );
+
+  if (isInline) return control;
+
+  return (
+    <Card className="profile-card p-6 border-slate-200/80 dark:border-white/10">
+      <CardHeader className="p-0 mb-4 text-center">
+        <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
+          Update Photo
+        </CardTitle>
+        <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+          JPG, PNG or WebP. Max 5 MB.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="p-0 flex flex-col items-center gap-4">
+        {control}
       </CardContent>
     </Card>
   );

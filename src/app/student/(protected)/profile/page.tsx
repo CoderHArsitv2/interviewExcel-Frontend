@@ -1,17 +1,31 @@
 "use client";
 
 import { useAuthContext } from "@/providers/authProvider";
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { StudentProfileResponse } from "./type";
 import EditProfileModal from "@/app/components/EditProfileModal";
 import ProfileImageUpload from "@/app/components/ProfileImageUpload";
-import { authenticatedGet } from "@/providers/api";
+import FeatureCard from "@/app/components/FeatureCard";
+import {
+  authenticatedGet,
+  authenticatedPut,
+  UploadImageResponse,
+} from "@/providers/api";
 import { useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Edit, Mail, Phone, Calendar, MapPin, User, Target } from "lucide-react";
-import { formatDate } from "@/utils/helpers"; 
+import {
+  Calendar,
+  CalendarDays,
+  Edit,
+  Mail,
+  MapPin,
+  Phone,
+  Sparkles,
+  Star,
+  Target,
+  Trophy,
+  User,
+} from "lucide-react";
+import { formatDate } from "@/utils/helpers";
 
 const StudentProfilePage = () => {
   const { user } = useAuthContext();
@@ -19,9 +33,41 @@ const StudentProfilePage = () => {
     useState<StudentProfileResponse | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [reloadKey, setReloadKey] = useState(0);
 
   const router = useRouter();
+
+  const fetchStudentProfile = async () => {
+    try {
+      setIsLoading(true);
+      const res: StudentProfileResponse = await authenticatedGet(
+        "/student/profile"
+      );
+      setStudentProfile(res);
+    } catch (error) {
+      console.warn("Error fetching student profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Mirrors the expert flow: persist the returned file_key onto the profile,
+  // otherwise the upload succeeds but the photo is dropped on the next fetch.
+  const handlePhotoUploaded = async (result: UploadImageResponse) => {
+    if (!studentProfile) return;
+    await authenticatedPut("/student/profile", {
+      full_name: studentProfile.full_name,
+      phone: studentProfile.phone || "",
+      city: studentProfile.city || "",
+      dob: studentProfile.dob || null,
+      preparing_for: studentProfile.preparing_for || "",
+      about_me: studentProfile.about_me || "",
+      skills: studentProfile.skills || [],
+      role: "student",
+      profile_picture_key: result.file_key,
+    });
+    await fetchStudentProfile();
+  };
+
   useEffect(() => {
     if (user && user.role !== "student") {
       router.replace(`/${user.role}/profile`);
@@ -29,159 +75,247 @@ const StudentProfilePage = () => {
   }, [user, router]);
 
   useEffect(() => {
-    const fetchStudentProfile = async () => {
-      try {
-        setIsLoading(true);
-        const res: StudentProfileResponse = await authenticatedGet(
-          "/student/profile"
-        );
-        setStudentProfile(res);
-      } catch (error) {
-        console.warn("Error fetching student profile:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchStudentProfile();
-  }, [isModalOpen, reloadKey]);
+  }, [isModalOpen]);
 
   if (!user || isLoading) {
     return (
-      <div className="flex h-[80vh] items-center justify-center text-gray-500">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="flex h-[70vh] items-center justify-center text-slate-500 dark:text-slate-400">
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+          <span>Loading profile...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!studentProfile) {
+    return (
+      <div className="flex h-[70vh] items-center justify-center text-slate-500 dark:text-slate-400">
+        No Profile Found
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto mb-10 my-6 px-4">
-      {studentProfile !== null ? (
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Column */}
-          <div className="w-full lg:w-[35%] flex flex-col gap-6 h-fit lg:sticky lg:top-6">
-          {/* Left Card: Profile Overview */}
-          <div className="glass rounded-3xl border border-white/40 p-8 flex flex-col items-center text-center">
-            <div className="relative w-48 h-48 rounded-full overflow-hidden border-4 border-white shadow-xl mb-6 ring-4 ring-primary/20">
-              <Image
-                src={`/profile.jpg`}
-                alt="Student Avatar"
-                fill
-                className="object-cover"
+    <>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+        {/* Left Column: Profile Card (4 cols) */}
+        <div className="lg:col-span-4 flex flex-col gap-6 h-fit lg:sticky lg:top-4">
+          <div className="profile-card p-6 sm:p-7 flex flex-col items-center text-center relative overflow-hidden">
+            {/* Ambient subtle glow */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-purple-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+            {/* Avatar doubles as the photo uploader */}
+            <div className="mb-4 w-full max-w-[15rem]">
+              <ProfileImageUpload
+                variant="inline"
+                uploadUrl="/upload/image"
+                currentImageUrl={studentProfile.profile_picture_url}
+                fallbackImageUrl={studentProfile.picture}
+                fallbackName={
+                  studentProfile.full_name || user?.full_name || "Student"
+                }
+                role="student"
+                onUploaded={handlePhotoUploaded}
+                onImageError={fetchStudentProfile}
               />
             </div>
 
-            <h2 className="text-3xl font-bold text-gray-900 mb-1">
-              {studentProfile?.full_name || "Student"}
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              {studentProfile.full_name || "Student"}
             </h2>
-            <Badge variant="secondary" className="mb-6 capitalize px-3 py-1 text-sm bg-primary/10 text-primary hover:bg-primary/20 border-primary/20">
-              {studentProfile?.role || "Student"}
-            </Badge>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-4 w-full mb-8">
-              <div className="bg-white/50 p-4 rounded-2xl border border-white/60 shadow-sm">
-                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Sessions</p>
-                <p className="text-2xl font-bold text-primary">{studentProfile.sessions || "-"}</p>
-              </div>
-              <div className="bg-white/50 p-4 rounded-2xl border border-white/60 shadow-sm">
-                <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Points</p>
-                <p className="text-2xl font-bold text-primary">{studentProfile.points || "-"}</p>
-              </div>
+            <div className="flex items-center gap-2 mt-1.5">
+              <span className="profile-badge-student capitalize">
+                🎓 {studentProfile.role || "Student"}
+              </span>
             </div>
 
-            <Button
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 rounded-xl py-6"
-              onClick={() => setIsModalOpen(true)}
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Profile
-            </Button>
-          </div>
-
-          {/* Upload Profile Photo */}
-          <ProfileImageUpload
-            uploadUrl="/upload/image"
-            fallbackName={studentProfile?.full_name || user?.full_name || "Student"}
-            onUploaded={() => setReloadKey((k) => k + 1)}
-          />
-          </div>
-
-          <EditProfileModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            profile={{
-              name: studentProfile?.full_name || "",
-              phone: studentProfile?.phone || "",
-              city: studentProfile?.city || "",
-              dob: studentProfile?.dob || "",
-              preparing_for: studentProfile?.preparing_for || "",
-              about_me: studentProfile?.about_me || "",
-              skills: studentProfile?.skills || [],
-            }}
-            onSave={() => {
-              setIsModalOpen(false);
-            }}
-          />
-
-          {/* Right Card: Detailed Info */}
-          <div className="glass rounded-3xl border border-white/40 p-8 w-full lg:w-[65%] space-y-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                <User className="w-6 h-6" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900">Student Details</h3>
+            {/* Key Metrics */}
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full mt-6">
+              <FeatureCard
+                role="student"
+                title={String(studentProfile.sessions || 0)}
+                description="Sessions"
+                icon={CalendarDays}
+              />
+              <FeatureCard
+                role="student"
+                title={String(studentProfile.points || 0)}
+                description="Points"
+                icon={Star}
+              />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
-              <DetailItem icon={<Mail className="w-4 h-4" />} label="Email" value={studentProfile?.email || "-"} />
-              <DetailItem icon={<Phone className="w-4 h-4" />} label="Phone" value={studentProfile?.phone || "-"} />
-              <DetailItem icon={<Target className="w-4 h-4" />} label="Preparing For" value={studentProfile?.preparing_for || "-"} />
-              <DetailItem icon={<Calendar className="w-4 h-4" />} label="Date Of Birth" value={formatDate(studentProfile?.dob)} />
-              <DetailItem icon={<MapPin className="w-4 h-4" />} label="City" value={studentProfile?.city || "-"} />
+            {/* Actions */}
+            <div className="flex flex-col gap-2.5 w-full mt-6">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="btn-student-primary w-full flex items-center justify-center gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                <span>Edit Profile</span>
+              </button>
+
+              <button
+                onClick={() => router.push("/student/sessions")}
+                className="btn-student-secondary w-full flex items-center justify-center gap-2"
+              >
+                <Calendar className="w-4 h-4" />
+                <span>My Sessions</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Details (8 cols) */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
+          <div className="profile-card p-6 sm:p-8 flex flex-col gap-8">
+            {/* Header */}
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-white/10">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <User className="w-5 h-5 text-purple-500" />
+                  Student Details
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                  Your profile as mentors see it when you book a session.
+                </p>
+              </div>
+
+              {studentProfile.preparing_for && (
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40 flex items-center gap-1.5">
+                  <Target className="w-3.5 h-3.5" />
+                  Preparing for {studentProfile.preparing_for}
+                </span>
+              )}
             </div>
 
             {/* About Me */}
-            <div className="border-t border-gray-200/50 pt-8">
-              <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-3">About Me</p>
-              <p className="text-gray-700 leading-relaxed bg-white/50 p-4 rounded-xl border border-white/60">
-                {studentProfile?.about_me || "No bio added yet."}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+                About Me
+              </h4>
+              <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50/70 dark:bg-slate-800/40 p-4 sm:p-5 rounded-2xl border border-slate-200/60 dark:border-white/5">
+                {studentProfile.about_me ||
+                  "No bio added yet. Click 'Edit Profile' to tell mentors what you're working towards."}
               </p>
             </div>
 
             {/* Skills */}
-            <div className="border-t border-gray-200/50 pt-8">
-              <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-3">Skills</p>
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2.5 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                Skills
+              </h4>
               <div className="flex flex-wrap gap-2">
                 {studentProfile.skills && studentProfile.skills.length > 0 ? (
                   studentProfile.skills.map((skill, i) => (
-                    <Badge key={i} variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-100 px-3 py-1">
+                    <span
+                      key={i}
+                      className="px-3 py-1 rounded-xl text-xs font-bold bg-purple-50 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40"
+                    >
                       {skill}
-                    </Badge>
+                    </span>
                   ))
                 ) : (
-                  <span className="text-gray-400 italic">No skills listed</span>
+                  <span className="text-xs text-slate-400 italic">
+                    No skills listed
+                  </span>
                 )}
+              </div>
+            </div>
+
+            {/* Details Grid */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">
+                Account Details
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+                <div className="detail-item-card">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Email Address</span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                    {studentProfile.email || "-"}
+                  </p>
+                </div>
+
+                <div className="detail-item-card">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Phone Number</span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    {studentProfile.phone || "-"}
+                  </p>
+                </div>
+
+                <div className="detail-item-card">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>City</span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    {studentProfile.city || "-"}
+                  </p>
+                </div>
+
+                <div className="detail-item-card">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>Date of Birth</span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    {formatDate(studentProfile.dob)}
+                  </p>
+                </div>
+
+                <div className="detail-item-card">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                    <Target className="w-3.5 h-3.5" />
+                    <span>Preparing For</span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                    {studentProfile.preparing_for || "-"}
+                  </p>
+                </div>
+
+                <div className="detail-item-card">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                    <Trophy className="w-3.5 h-3.5" />
+                    <span>Points Earned</span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    {studentProfile.points || "0"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      ) : (
-        <div className="flex h-[80vh] items-center justify-center text-gray-500">
-          No Profile Found
-        </div>
-      )}
-    </div>
+      </div>
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        profile={{
+          name: studentProfile.full_name || "",
+          phone: studentProfile.phone || "",
+          city: studentProfile.city || "",
+          dob: studentProfile.dob || "",
+          preparing_for: studentProfile.preparing_for || "",
+          about_me: studentProfile.about_me || "",
+          skills: studentProfile.skills || [],
+        }}
+        onSave={() => {
+          setIsModalOpen(false);
+        }}
+      />
+    </>
   );
 };
-
-const DetailItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="flex items-start gap-3">
-    <div className="mt-1 text-gray-400">{icon}</div>
-    <div>
-      <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-0.5">{label}</p>
-      <p className="text-gray-900 font-medium text-lg">{value}</p>
-    </div>
-  </div>
-);
 
 export default StudentProfilePage;

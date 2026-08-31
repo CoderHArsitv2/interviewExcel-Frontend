@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.17](https://github.com/CoderHArsitv2/interviewExcel-Frontend/compare/v0.1.16...v0.1.17) (2026-08-31)
+
+
+### Bug Fixes
+
+* fixed the auth pages ([1439aee](https://github.com/CoderHArsitv2/interviewExcel-Frontend/commit/1439aee47519fd33fa45dad5ffe89b899fec71cf))
+* fixed the auth pages ([dd0e83b](https://github.com/CoderHArsitv2/interviewExcel-Frontend/commit/dd0e83b02691fb614f9947570bae1f4f8aacb732))
+* Internal refresh ([3f7283d](https://github.com/CoderHArsitv2/interviewExcel-Frontend/commit/3f7283d89c2ea25cb01822ca0fcdbca2ff1e4c03))
+
 ## [0.1.16](https://github.com/CoderHArsitv2/interviewExcel-Frontend/compare/v0.1.15...v0.1.16) (2026-08-28)
 
 
